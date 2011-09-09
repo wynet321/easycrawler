@@ -49,7 +49,7 @@ public class Crawler {
 
 	public static void get() {
 		Parser parser;
-		for (int j=0;j<10;j++)
+		for (int j=0;j<2;j++)
 		try {
 			parser = new Parser(
 					"http://cn.bing.com/search?q=%E5%AE%98%E6%96%B9%E7%BD%91%E7%AB%99&go=&first="+(0==j?"":String.valueOf(j))+"1");
