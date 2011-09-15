@@ -3,11 +3,51 @@ package com.easycrawler;
 import org.htmlparser.Parser;
 import org.htmlparser.Tag;
 import org.htmlparser.filters.HasAttributeFilter;
-import org.htmlparser.filters.TagNameFilter;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
 public class Crawler {
+
+	public static void main(String[] args) {
+		// String url = "http://www.audi.cn/";
+		get();
+		// getResponse(url);
+	}
+
+	public static void get() {
+		Parser parser;
+		for (int j = 0; j < 2; j++)
+			try {
+				parser = new Parser(
+						"http://cn.bing.com/search?q=%E5%AE%98%E6%96%B9%E7%BD%91%E7%AB%99&go=&first="
+								+ (0 == j ? "" : String.valueOf(j)) + "1");
+				HasAttributeFilter nf = new HasAttributeFilter();
+				nf.setAttributeName("class");
+				nf.setAttributeValue("sa_cc");
+				NodeList list = parser.extractAllNodesThatMatch(nf);
+
+				int i = 0;
+				String href = new String("");
+				int size = list.size();
+				while (i < size) {
+					href = ((Tag) list.elementAt(i).getFirstChild()
+							.getFirstChild().getFirstChild())
+							.getAttribute("href");
+					if (!href.contains("cc.bingj.com")) {
+						System.out.println(href);
+						System.out.println(list.elementAt(i).getChildren()
+								.elementAt(0).toPlainTextString());
+						System.out.println(list.elementAt(i).getChildren()
+								.elementAt(1).toPlainTextString());
+					}
+					i++;
+				}
+			} catch (ParserException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+	}
 
 	// public static void getResponse(String url) {
 	// HttpClient httpclient = new DefaultHttpClient();
@@ -46,46 +86,5 @@ public class Crawler {
 	// }
 	//
 	// }
-
-	public static void get() {
-		Parser parser;
-		for (int j=0;j<2;j++)
-		try {
-			parser = new Parser(
-					"http://cn.bing.com/search?q=%E5%AE%98%E6%96%B9%E7%BD%91%E7%AB%99&go=&first="+(0==j?"":String.valueOf(j))+"1");
-			HasAttributeFilter nf = new HasAttributeFilter();
-			nf.setAttributeName("class");
-			nf.setAttributeValue("sa_cc");
-			NodeList list = parser.extractAllNodesThatMatch(nf);
-			
-			int i = 0;
-			String href = new String("");
-			int size=list.size();
-			while (i < size) {
-				href = ((Tag) list.elementAt(i).getFirstChild().getFirstChild().getFirstChild()).getAttribute("href");
-				if (!href.contains("cc.bingj.com"))
-				{
-					System.out.println(href);
-					System.out.println(list.elementAt(i).getChildren().elementAt(0).toPlainTextString());
-					System.out.println(list.elementAt(i).getChildren().elementAt(1).toPlainTextString());
-				}
-				i++;
-			}
-		} catch (ParserException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		String url = "http://www.audi.cn/";
-		get(); // 第一种方法
-		// getResponse(url);
-	}
 
 }

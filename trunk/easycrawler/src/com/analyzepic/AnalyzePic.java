@@ -4,13 +4,15 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
 public class AnalyzePic {
 
-	private final static float SIMILARITYLIMIT = 0.87f;
+	private final static float SIMILARITYLIMIT = 0.9f;
 	private static int[][] matrix;
 	// 0-9 and 10: +, 11: -
 	private final static String[] model = {
@@ -163,34 +165,24 @@ public class AnalyzePic {
 	 * @args[0] - Image full path and file name
 	 */
 	public static void main(String[] args) {
-		new AnalyzePic().showResult("");
+		
+		//System.out.println("The answer is " + new AnalyzePic().getResult(""));
 	}
 
-	private void showResult(String fileName) {
+	public int getResult(InputStream content) throws IOException {
 
-		Image img = readImage(fileName);
+		Image img= ImageIO.read(content);
 		transferImageToMatrix(img);
-		System.out.println("The answer is " + getResult());
+		return calcResult();
 
 	}
+	
+	public int getResult(URL fileName) throws IOException {
 
-	private Image readImage(String fileName) {
-		File imgFile;
-		Image img = null;
-
-		if ("" != fileName)
-			imgFile = new File(fileName);
-		else
-			imgFile = new File("c:/validateCode.jpg");
-
-		try {
-			// get original image
-			img = ImageIO.read(imgFile);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return img;
+		// get original image
+		Image img = ImageIO.read(fileName);
+		transferImageToMatrix(img);
+		return calcResult();
 	}
 
 	private BufferedImage cropImage(Image img, Point startPoint,
@@ -348,7 +340,7 @@ public class AnalyzePic {
 		return "";
 	}
 
-	private int getResult() {
+	private int calcResult() {
 		String formula = getFormula();
 		String[] formulaArray = formula.split(" ");
 		int firstDigit = 0;
