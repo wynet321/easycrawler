@@ -2,6 +2,7 @@ package com.analyzepic;
 
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -9,183 +10,375 @@ import javax.imageio.ImageIO;
 
 public class AnalyzePic {
 
+	private final static float SIMILARITYLIMIT = 0.87f;
+	private static int[][] matrix;
+	// 0-9 and 10: +, 11: -
+	private final static String[] model = {
+			"00111100" +
+			"01111110" +
+			"01100110" +
+			"11000011" +
+			"11000011" +
+			"11000011" +
+			"11000011" +
+			"11000011" +
+			"01100110" +
+			"01111110" +
+			"00111100",
+			
+			"001100" +
+			"111100" +
+			"111100" +
+			"001100" +
+			"001100" +
+			"001100" +
+			"001100" +
+			"001100" +
+			"001100" +
+			"111111" +
+			"111111",
+			
+			"0111110" +
+			"1111111" +
+			"1000011" +
+			"0000011" +
+			"0000110" +
+			"0001100" +
+			"0011000" +
+			"0110000" +
+			"1100000" +
+			"1111111" +
+			"1111111",
+			
+			"01111100" +
+			"11111111" +
+			"10000011" +
+			"00000011" +
+			"00111110" +
+			"00111110" +
+			"00000111" +
+			"00000011" +
+			"10000111" +
+			"11111110" +
+			"01111100",
+			
+			"00011110" +
+			"00011110" +
+			"00110110" +
+			"00110110" +
+			"01100110" +
+			"11000110" +
+			"11111111" +
+			"11111111" +
+			"00000110" +
+			"00000110" +
+			"00000110",
+			
+			"11111111" +
+			"11111111" +
+			"11000000" +
+			"11000000" +
+			"11111000" +
+			"11111110" +
+			"00000111" +
+			"00000011" +
+			"10000111" +
+			"11111110" +
+			"01111100",
+			
+			"00011110" +
+			"01111111" +
+			"01100001" +
+			"11100000" +
+			"11011100" +
+			"11111111" +
+			"11000011" +
+			"11000011" +
+			"11100011" +
+			"01111110" +
+			"00111100",
+			
+			"1111111" +
+			"1111111" +
+			"0000011" +
+			"0000110" +
+			"0001100" +
+			"0001100" +
+			"0011000" +
+			"0110000" +
+			"0110000" +
+			"1100000" +
+			"1100000",
+			
+			"00111110" +
+			"01111111" +
+			"11000011" +
+			"11100010" +
+			"01111100" +
+			"01111110" +
+			"11000111" +
+			"11000011" +
+			"11100011" +
+			"01111110" +
+			"00111100",
+			
+			
+			"00111100" +
+			"01111110" +
+			"11000111" +
+			"11000011" +
+			"11000011" +
+			"01111111" +
+			"00111011" +
+			"00000011" +
+			"10000110" +
+			"11111110" +
+			"01111000",
+			
+			"000000000" +
+			"000000000" +
+			"000010000" +
+			"000010000" +
+			"000010000" +
+			"000010000" +
+			"111111111" +
+			"000010000" +
+			"000010000" +
+			"000010000" +
+			"000010000",
+			
+			"0000000" +
+			"0000000" +
+			"0000000" +
+			"0000000" +
+			"0000000" +
+			"1111111" +
+			"1111111" +
+			"0000000" +
+			"0000000" +
+			"0000000" +
+			"0000000" };
+	
 	/**
-	 * @param args
+	 * @args[0] - Image full path and file name
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		new AnalyzePic().showResult("");
+	}
+
+	private void showResult(String fileName) {
+
+		Image img = readImage(fileName);
+		transferImageToMatrix(img);
+		System.out.println("The answer is " + getResult());
+
+	}
+
+	private Image readImage(String fileName) {
+		File imgFile;
+		Image img = null;
+
+		if ("" != fileName)
+			imgFile = new File(fileName);
+		else
+			imgFile = new File("c:/validateCode.jpg");
+
 		try {
-
 			// get original image
-			Image img = ImageIO.read(new File("c:/validateCode.jpg"));
-			int srcWidth = img.getWidth(null);
-			int srcHeight = img.getHeight(null);
-			int tgtWidth = srcWidth - 9;
-			// int tgtWidth=7;
-			int tgtHeight = srcHeight - 7;
-
-			BufferedImage tag = new BufferedImage(tgtWidth, tgtHeight,
-					BufferedImage.TYPE_INT_RGB);
-			Graphics g = tag.getGraphics();
-			g.drawImage(img, -7, -5, srcWidth, srcHeight, null);
-			g.dispose();
-			int[][] pixel = new int[tgtWidth][tgtHeight];
-			for (int y = 0; y < tgtHeight; y++) {
-				for (int x = 0; x < tgtWidth; x++) {
-					//pixel[x][y]=(tag.getRGB(x, y) & 0xffffff);
-					//pixel[x][y]=Integer.valueOf((tag.getRGB(x, y) >> 20) & 0xf);
-					pixel[x][y] = (int) (Integer
-							.valueOf((tag.getRGB(x, y) >> 4) & 0xf) + Integer
-							.valueOf(((tag.getRGB(x, y) >> 12) & 0xf)
-									+ Integer.valueOf((tag.getRGB(x, y) >> 20) & 0xf)));
-					if (pixel[x][y] > 24)
-						pixel[x][y] = 0;
-					else
-						pixel[x][y] = 1;
-					//pixel[x][y]=pixel[x][y]>8?0:1;
-				}
-				// System.out.println();
-			}
-			for (int y = 0; y < tgtHeight; y++) {
-				for (int x = 0; x < tgtWidth; x++) {
-					System.out.print(pixel[x][y]);
-				}
-				System.out.println();
-			}
-			
-//			for (int y = 0; y < tgtHeight; y++) {
-//				for (int x = 0; x < tgtWidth; x++) {
-//					System.out.print(Integer.toHexString(pixel[x][y])+" ");
-//				}
-//				System.out.println();
-//			}
-			
-			System.out.println(getResult(pixel, tgtWidth, tgtHeight));
-
-			// System.out.println(Integer.toHexString((pixel[0]& 16711680) >>
-			// 16));
-			// 输出为文件
-			// ImageIO.write(tag, "JPEG", new File("c:/new.jpg"));
+			img = ImageIO.read(imgFile);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return img;
 	}
 
-	public static int getStartX(int[][] pixel, int offsetX, int Width,
-			int Height) {
-		for (int x = offsetX; x < Width; x++)
-			for (int y = 0; y < Height; y++) {
-				if (1 == pixel[x][y]&&isPointAround(pixel,x,y))
-					return x;
+	private BufferedImage cropImage(Image img, Point startPoint,
+			Point cropLength) {
+		int srcWidth = 0, srcHeight = 0, tgtWidth = 0, tgtHeight = 0;
+		srcWidth = img.getWidth(null);
+		srcHeight = img.getHeight(null);
+		tgtWidth = srcWidth + cropLength.x;
+		// int tgtWidth=7;
+		tgtHeight = srcHeight + cropLength.y;
+		BufferedImage bi = new BufferedImage(tgtWidth, tgtHeight,
+				BufferedImage.TYPE_INT_RGB);
+		// crop
+		Graphics g = bi.getGraphics();
+		g.drawImage(img, startPoint.x, startPoint.y, srcWidth, srcHeight, null);
+		g.dispose();
+		return bi;
+	}
+
+	private void transferImageToMatrix(Image img) {
+		BufferedImage bi = cropImage(img, new Point(-7, -5), new Point(-9, -7));
+		int width = 0, height = 0;
+		width = bi.getWidth();
+		height = bi.getHeight();
+		matrix = new int[width][height];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				matrix[x][y] = (int) (Integer
+						.valueOf((bi.getRGB(x, y) >> 4) & 0xf) + Integer
+						.valueOf(((bi.getRGB(x, y) >> 12) & 0xf)
+								+ Integer.valueOf((bi.getRGB(x, y) >> 20) & 0xf)));
+				if (matrix[x][y] > 24)
+					matrix[x][y] = 0;
+				else
+					matrix[x][y] = 1;
 			}
-		return Width;
+			// System.out.println();
+		}
+
+		// debug code
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				System.out.print(matrix[x][y]);
+			}
+			System.out.println();
+		}
 	}
 
-	public static boolean isPointAround(int[][] pixel,int x, int y)
-	{
-		if(x-1>=0&& 1==pixel[x-1][y])
+	/**
+	 * Check if there is any point around (x,y).
+	 * 
+	 * @param x
+	 *            - coordinate x
+	 * @param y
+	 *            - coordinate y
+	 * @return true if there is
+	 */
+	private boolean isPointAround(int x, int y) {
+		if (x - 1 >= 0 && 1 == matrix[x - 1][y])
 			return true;
-		if(x+1<=pixel.length&&1==pixel[x+1][y])
+		if (x + 1 <= matrix.length && 1 == matrix[x + 1][y])
 			return true;
-		if(y-1>=0&&1==pixel[x][y-1])
+		if (y - 1 >= 0 && 1 == matrix[x][y - 1])
 			return true;
-		if(y+1<=pixel[0].length&&1==pixel[x][y+1])
+		if (y + 1 <= matrix[0].length && 1 == matrix[x][y + 1])
 			return true;
 		return false;
 	}
-	public static int getEndX(int[][] pixel, int offsetX, int Width, int Height) {
+
+	/**
+	 * Get Character start location X
+	 * 
+	 * @param offsetX
+	 *            - Offset location X to start searching
+	 * @return the start location X
+	 */
+	private int getCharStartX(int offsetX) {
+		int width = matrix.length;
+		int height = matrix[0].length;
+		for (int x = offsetX; x < width; x++)
+			for (int y = 0; y < height; y++) {
+				if (1 == matrix[x][y] && isPointAround(x, y))
+					return x;
+			}
+		return width;
+	}
+
+	/**
+	 * Get Character end location X
+	 * 
+	 * @param offsetX
+	 *            - Offset location X to start searching
+	 * @return the end location X
+	 */
+	private int getCharEndX(int offsetX) {
+		int width = matrix.length;
+		int height = matrix[0].length;
 		int x, y;
-		for (x = offsetX; x < Width; x++) {
-			for (y = 0; y < Height; y++) {
-				if (1 == pixel[x][y])
+		for (x = offsetX; x < width; x++) {
+			for (y = 0; y < height; y++) {
+				if (1 == matrix[x][y] && isPointAround(x, y))
 					break;
 			}
-			if (y == Height && x-offsetX>5)
+			if (y == height && x - offsetX > 5)
 				return x;
 		}
-		return Width;
+		return width;
 	}
 
-	public static String getCharacter(int[][] pixel, int Width, int Height,
-			int cursorX) {
-
-		int startX = getStartX(pixel, cursorX, Width, Height);
-		int endX = getEndX(pixel, startX, Width, Height);
-		String Character = transferToCharacter(pixel, Height, startX, endX);
-		if ("" != Character) {
-			Character += getCharacter(pixel, Width, Height, endX);
+	/**
+	 * Get the formula as showed in image
+	 * 
+	 * @return sample - image: 22+14=, formula: 2 2 11 1 4 sample - image:
+	 *         22-14=, formula: 2 2 10 1 4
+	 */
+	private String getFormula() {
+		int startX = 0;
+		int endX = 0;
+		String character = "";
+		String formula = "";
+		while (endX < matrix.length) {
+			startX = getCharStartX(endX);
+			endX = getCharEndX(startX);
+			character = transferModelToCharacter(startX, endX);
+			formula += character;
 		}
-
-		return Character;
+		return formula;
 	}
 
-	public static String transferToCharacter(int[][] pixel, int Height,
-			int startX, int endX) {
-		String[] character = new String[12];
-		character[0] = "0011110001111110011001101100001111000011110000111100001111000011011001100111111000111100";
-		character[1] = "001100111100111100001100001100001100001100001100001100111111111111";
-		character[2] = "01111101111111100001100000110000110000110000110000110000110000011111111111111";
-		character[3] = "0111110011111111100000110000001100111110001111100000011100000011100001111111111001111100";
-		character[4] = "0001111000011110001101100011011001100110110001101111111111111111000001100000011000000110";
-		character[5] = "111111111111111111000000110000001111100111111100000011100000011100001111111111001111100";
-		character[6] = "0001111001111111011000011110000011011100111111111100001111000011111000110111111000111100";
-		character[7] = "11111111111111000001100001100001100000110000110000110000011000011000001100000";
-		character[8] = "0011111001111111110000111110001001111100011111101100011111000011111000110111111000111100";
-		character[9] = "0011110001111110110001111100001111000011011111110011101100000011100001101111111001111000";
-		character[10] = "000000000000000000000010000000010000000010000000010000111111111000010000000010000000010000000010000";
-		character[11] = "00000000000000000000000000000000000111111111111110000000000000000000000000000";
+	/**
+	 * Transfer model matrix to characters
+	 */
+	private String transferModelToCharacter(int startX, int endX) {
 		String tgtString = "";
-		int Similarity = 0;
-		for (int y = 0; y < Height; y++) {
+		int similarity = 0;
+		int height = matrix[0].length;
+
+		for (int y = 0; y < height; y++) {
 			for (int x = startX; x < endX; x++) {
-				tgtString += String.valueOf(pixel[x][y]);
+				tgtString += String.valueOf(matrix[x][y]);
 			}
 		}
 		int i;
-		for (i = 0; i < character.length; i++) {
-			int length=((tgtString.length()>=character[i].length())?character[i].length():tgtString.length());
-			for (int j = 0; j <length ; j++)
-				if (tgtString.getBytes()[j] == (character[i].getBytes()[j]))
-					Similarity += 1;
-			if ((float)Similarity /(float)length> 0.85)
+		for (i = 0; i < model.length; i++) {
+			int length = ((tgtString.length() >= model[i].length()) ? model[i]
+					.length() : tgtString.length());
+			for (int j = 0; j < length; j++)
+				if (tgtString.getBytes()[j] == (model[i].getBytes()[j]))
+					similarity += 1;
+			if ((float) similarity / (float) length > SIMILARITYLIMIT)
 				return String.valueOf(i) + " ";
 			else
-				Similarity=0;
+				similarity = 0;
 		}
 		return "";
 	}
 
-	public static int getResult(int[][] pixel, int Width, int Height) {
+	private int getResult() {
+		String formula = getFormula();
+		String[] formulaArray = formula.split(" ");
+		int firstDigit = 0;
+		int secondDigit = 0;
+		int result = 0;
 
-		String Formula = getCharacter(pixel, Width, Height, 0);
-		String[] FormulaArray = Formula.split(" ");
-		int FirstDigit = 0;
-		int SecondDigit = 0;
-		int Result = 0;
-
-		if (Formula.contains("10")) {
-			for (int i = 0; i < FormulaArray.length; i++)
-				if (!FormulaArray[i].equals("10")) {
-					Result = Result * 10 + Integer.valueOf(FormulaArray[i]);
+		if (formula.contains("10")) {
+			for (int i = 0; i < formulaArray.length; i++)
+				if (!formulaArray[i].equals("10")) {
+					result = result * 10 + Integer.valueOf(formulaArray[i]);
 				} else {
-					FirstDigit = Result;
-					Result = 0;
+					firstDigit = result;
+					result = 0;
 				}
-			SecondDigit = Result;
-			Result = FirstDigit + SecondDigit;
+			secondDigit = result;
+			result = firstDigit + secondDigit;
 		}
-		if (Formula.contains("11")) {
-			for (int i = 0; i < FormulaArray.length; i++)
-				if (!FormulaArray[i].equals("11")) {
-					Result = Result * 10 + Integer.valueOf(FormulaArray[i]);
+		if (formula.contains("11")) {
+			for (int i = 0; i < formulaArray.length; i++)
+				if (!formulaArray[i].equals("11")) {
+					result = result * 10 + Integer.valueOf(formulaArray[i]);
 				} else {
-					FirstDigit = Result;
-					Result = 0;
+					firstDigit = result;
+					result = 0;
 				}
-			SecondDigit = Result;
-			Result = FirstDigit - SecondDigit;
+			secondDigit = result;
+			result = firstDigit - secondDigit;
 		}
-		return Result;
+		return result;
 	}
+	
+	
 }
