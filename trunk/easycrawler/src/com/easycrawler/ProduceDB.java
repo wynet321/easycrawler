@@ -22,7 +22,7 @@ import com.analyzepic.AnalyzePic;
 public class ProduceDB {
 
 	private static DefaultHttpClient httpClient = new DefaultHttpClient();
-	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=baidu.com";
+	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=com";
 	private static String resultPath = "d:/easycrawlerresult";
 	private static String charSet = "GBK";
 
