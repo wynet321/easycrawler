@@ -13,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.htmlparser.Parser;
+import org.htmlparser.Tag;
 import org.htmlparser.filters.HasAttributeFilter;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
@@ -22,7 +23,8 @@ import com.analyzepic.AnalyzePic;
 public class ProduceDB {
 
 	private static DefaultHttpClient httpClient = new DefaultHttpClient();
-	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=com";
+	private static String hostUrl="http://www.miibeian.gov.cn";
+	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=baidu.com";
 	private static String resultPath = "d:/easycrawlerresult";
 	private static String charSet = "GBK";
 
@@ -44,7 +46,7 @@ public class ProduceDB {
 		String htmlLine = "";
 		String htmlContent = "";
 		while ((htmlLine = br.readLine()) != null) {
-			htmlContent += htmlLine + "\r\n";
+			htmlContent += htmlLine;
 		}
 		br.close();
 		return htmlContent;
@@ -85,6 +87,7 @@ public class ProduceDB {
 		String htmlContent = "";
 		int pageNum = 1;
 		int errorTimes = 0;
+		String[] cellUrl=new String[20];
 		FileWriter fw = new FileWriter(path + "/0.txt");
 		HasAttributeFilter nf = new HasAttributeFilter();
 		NodeList list = new NodeList();
@@ -111,6 +114,9 @@ public class ProduceDB {
 						fw = new FileWriter(path + "/"
 								+ String.valueOf(pageNum / 500) + ".txt");
 					}
+					for(int i=0;i<20;i++)
+						cellUrl[i]=hostUrl+((Tag)(list.elementAt(0).getChildren().elementAt(1).getChildren().elementAt(2*i+3).getChildren().elementAt(7).getChildren().elementAt(1))).getAttribute("href");
+					aaa(cellUrl,pageNum);
 					fw.append((CharSequence) list.elementAt(0).toHtml());
 					fw.append("\r\n");
 					pageNum++;
@@ -124,5 +130,42 @@ public class ProduceDB {
 			}
 		}
 		fw.close();
+	}
+	
+	private static void aaa(String[] Url, int pageNum) throws IOException, ParserException
+	{
+		FileWriter fw = new FileWriter(resultPath + "/0.txt");
+		HasAttributeFilter nf = new HasAttributeFilter();
+		NodeList list = new NodeList();
+		String htmlContent = "";
+		int errorTimes = 0;
+		for(int i=0;i<Url.length;i++)
+		{
+				htmlContent = getResponseAsString(Url[i]);
+				Parser parser = new Parser(htmlContent);
+					nf.setAttributeName("class");
+					nf.setAttributeValue("a");
+					list = parser.extractAllNodesThatMatch(nf);
+					if (list.size() ==2) {
+						errorTimes = 0;
+						if (0 == pageNum % 500) {
+							fw.close();
+							fw = new FileWriter(resultPath + "/"
+									+ String.valueOf(pageNum / 500) + ".txt");
+						}
+						fw.append((CharSequence) list.elementAt(0).toHtml());
+						fw.append((CharSequence) list.elementAt(1).toHtml());
+						fw.append("\r\n");
+					} else {
+						System.out.println(errorTimes);
+						i--;
+						if (errorTimes++ > 5) {
+							fw.close();
+							return;
+						}
+					}
+					
+			}
+			fw.close();
 	}
 }
