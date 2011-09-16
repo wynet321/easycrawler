@@ -84,24 +84,33 @@ public class ProduceDB {
 		String Url = "";
 		String htmlContent = "";
 		int pageNum = 1;
-		FileWriter fw = new FileWriter(path + "/1.txt");
+		FileWriter fw = new FileWriter(path + "/0.txt");
+		HasAttributeFilter nf = new HasAttributeFilter();
+		NodeList list = new NodeList();
 		while (pageNum < totalPageNum) {
 			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 					+ String.valueOf(pageNum);
 			htmlContent = getResponseAsString(Url);
 			Parser parser = new Parser(htmlContent);
-			HasAttributeFilter nf = new HasAttributeFilter();
-			nf.setAttributeName("class");
-			nf.setAttributeValue("a");
-			NodeList list = parser.extractAllNodesThatMatch(nf);
-			if (0 == pageNum % 1000) {
-				fw.close();
-				fw = new FileWriter(path + "/" + String.valueOf(pageNum / 1000)
-						+ ".txt");
+			nf.setAttributeName("id");
+			nf.setAttributeValue("button1");
+			list = parser.extractAllNodesThatMatch(nf);
+			if (list.size() > 0)
+				// reget verifyCode
+				verifyCode = getVerifyCode();
+			else {
+				nf.setAttributeName("class");
+				nf.setAttributeValue("a");
+				list = parser.extractAllNodesThatMatch(nf);
+				if (0 == pageNum % 500) {
+					fw.close();
+					fw = new FileWriter(path + "/"
+							+ String.valueOf(pageNum / 500) + ".txt");
+				}
+				fw.append((CharSequence) list.elementAt(0).toHtml());
+				fw.append("\r\n");
+				pageNum++;
 			}
-			fw.append((CharSequence) list.elementAt(0).toHtml());
-			fw.append("\r\n");
-			pageNum++;
 		}
 		fw.close();
 	}
