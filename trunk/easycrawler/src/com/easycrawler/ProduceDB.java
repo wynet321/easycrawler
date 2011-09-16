@@ -3,11 +3,13 @@ package com.easycrawler;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.htmlparser.Parser;
@@ -19,62 +21,74 @@ import com.analyzepic.AnalyzePic;
 
 public class ProduceDB {
 
-	public static void main(String[] args) throws IOException, ParserException {
-		HttpHost targetHost = new HttpHost("www.miibeian.gov.cn", 80, "http");
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+	private static DefaultHttpClient httpClient = new DefaultHttpClient();
+	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=baidu.com";
+	private static String resultPath = "d:/easycrawlerresult";
+	private static String charSet = "GBK";
 
-		String url = "http://www.miibeian.gov.cn/validateCode";
-
-		HttpPost httpPost = new HttpPost(url);
-		HttpResponse response = httpclient.execute(targetHost, httpPost);
-
+	private static InputStream getResponseAsStream(String Url)
+			throws ClientProtocolException, IOException {
+		HttpPost httpPost = new HttpPost(Url);
+		HttpResponse response = httpClient.execute(httpPost);
+		while (response.getStatusLine().getStatusCode() != 200)
+			response = httpClient.execute(httpPost);
 		HttpEntity entity = response.getEntity();
-		AnalyzePic ap = new AnalyzePic();
-		int result = ap.getResult(entity.getContent());
-		System.out.println(result);
+		return entity.getContent();
+	}
 
-		url = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=com&verifyCode="
-				+ result + "&pageNo=1";
-		httpPost = new HttpPost(url);
-		response = httpclient.execute(targetHost, httpPost);
-		entity = response.getEntity();
+	private static String getResponseAsString(String Url)
+			throws UnsupportedEncodingException, ClientProtocolException,
+			IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
-				entity.getContent(),"GBK"));
-
+				getResponseAsStream(Url), charSet));
 		String htmlLine = "";
 		String htmlContent = "";
-
 		while ((htmlLine = br.readLine()) != null) {
-			htmlContent += htmlLine+"\r\n";
+			htmlContent += htmlLine + "\r\n";
 		}
 		br.close();
-		//htmlContent = new String(htmlContent.getBytes(), "UTF-8");
-		//System.out.println(htmlContent); 
+		return htmlContent;
+	}
+
+	private static String getVerifyCode() throws ClientProtocolException,
+			IOException {
+		String Url = "http://www.miibeian.gov.cn/validateCode";
+		AnalyzePic ap = new AnalyzePic();
+		String result = String.valueOf(ap.getResult(getResponseAsStream(Url)));
+		// System.out.println(result);
+		return result;
+	}
+
+	private static int getTotalPageNum(String verifyCode)
+			throws UnsupportedEncodingException, ClientProtocolException,
+			IOException {
+		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo=1";
+		String htmlContent = getResponseAsString(Url);
 		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
 		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
 				totalPageNumStart);
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
+		return totalPageNum;
+	}
 
+	public static void main(String[] args) throws ClientProtocolException,
+			IOException, ParserException {
+		String verifyCode = getVerifyCode();
+		int totalPageNum = getTotalPageNum(verifyCode);
+		produceResultFile(verifyCode, totalPageNum, resultPath);
+	}
+
+	private static void produceResultFile(String verifyCode, int totalPageNum,
+			String path) throws IOException, ParserException {
+		String Url = "";
+		String htmlContent = "";
 		int pageNum = 1;
-		FileWriter fw = new FileWriter("d:/easycrawlerresult/1.txt");
+		FileWriter fw = new FileWriter(path + "/1.txt");
 		while (pageNum < totalPageNum) {
-			url = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=com&verifyCode="
-					+ result + "&pageNo=" + String.valueOf(pageNum);
-			httpPost = new HttpPost(url);
-			response = httpclient.execute(targetHost, httpPost);
-			entity = response.getEntity();
-			br = new BufferedReader(new InputStreamReader(entity.getContent(),
-					"GBK"));
-
-			htmlLine = "";
-			htmlContent = "";
-
-			while ((htmlLine = br.readLine()) != null) {
-				htmlContent += htmlLine;
-			}
-			br.close();
-			//htmlContent = new String(htmlContent.getBytes(), "UTF-8");
+			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
+					+ String.valueOf(pageNum);
+			htmlContent = getResponseAsString(Url);
 			Parser parser = new Parser(htmlContent);
 			HasAttributeFilter nf = new HasAttributeFilter();
 			nf.setAttributeName("class");
@@ -82,8 +96,8 @@ public class ProduceDB {
 			NodeList list = parser.extractAllNodesThatMatch(nf);
 			if (0 == pageNum % 1000) {
 				fw.close();
-				fw = new FileWriter("d:/easycrawlerresult/"
-						+ String.valueOf(pageNum / 1000) + ".txt");
+				fw = new FileWriter(path + "/" + String.valueOf(pageNum / 1000)
+						+ ".txt");
 			}
 			fw.append((CharSequence) list.elementAt(0).toHtml());
 			fw.append("\r\n");

@@ -369,6 +369,7 @@ public class AnalyzePic {
 			secondDigit = result;
 			result = firstDigit - secondDigit;
 		}
+		System.out.println("The answer is " + result);
 		return result;
 	}
 	
