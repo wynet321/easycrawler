@@ -39,17 +39,17 @@ public class ProduceDB {
 		response = httpclient.execute(targetHost, httpPost);
 		entity = response.getEntity();
 		BufferedReader br = new BufferedReader(new InputStreamReader(
-				entity.getContent(), "GBK"));
+				entity.getContent(),"GBK"));
 
 		String htmlLine = "";
 		String htmlContent = "";
 
 		while ((htmlLine = br.readLine()) != null) {
-			htmlContent += htmlLine;
+			htmlContent += htmlLine+"\r\n";
 		}
 		br.close();
-		htmlContent = new String(htmlContent.getBytes(), "UTF-8");
-		// System.out.println(page);
+		//htmlContent = new String(htmlContent.getBytes(), "UTF-8");
+		//System.out.println(htmlContent); 
 		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
 		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
 				totalPageNumStart);
@@ -74,8 +74,8 @@ public class ProduceDB {
 				htmlContent += htmlLine;
 			}
 			br.close();
-			htmlContent = new String(htmlContent.getBytes(), "UTF-8");
-			Parser parser = Parser.createParser(htmlContent, "UTF-8");
+			//htmlContent = new String(htmlContent.getBytes(), "UTF-8");
+			Parser parser = new Parser(htmlContent);
 			HasAttributeFilter nf = new HasAttributeFilter();
 			nf.setAttributeName("class");
 			nf.setAttributeValue("a");
