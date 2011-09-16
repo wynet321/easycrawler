@@ -84,6 +84,7 @@ public class ProduceDB {
 		String Url = "";
 		String htmlContent = "";
 		int pageNum = 1;
+		int errorTimes = 0;
 		FileWriter fw = new FileWriter(path + "/0.txt");
 		HasAttributeFilter nf = new HasAttributeFilter();
 		NodeList list = new NodeList();
@@ -99,17 +100,27 @@ public class ProduceDB {
 				// reget verifyCode
 				verifyCode = getVerifyCode();
 			else {
+				parser = new Parser(htmlContent);
 				nf.setAttributeName("class");
 				nf.setAttributeValue("a");
 				list = parser.extractAllNodesThatMatch(nf);
-				if (0 == pageNum % 500) {
-					fw.close();
-					fw = new FileWriter(path + "/"
-							+ String.valueOf(pageNum / 500) + ".txt");
+				if (list.size() > 0) {
+					errorTimes = 0;
+					if (0 == pageNum % 500) {
+						fw.close();
+						fw = new FileWriter(path + "/"
+								+ String.valueOf(pageNum / 500) + ".txt");
+					}
+					fw.append((CharSequence) list.elementAt(0).toHtml());
+					fw.append("\r\n");
+					pageNum++;
+				} else {
+					System.out.println(errorTimes);
+					if (errorTimes++ > 10) {
+						fw.close();
+						return;
+					}
 				}
-				fw.append((CharSequence) list.elementAt(0).toHtml());
-				fw.append("\r\n");
-				pageNum++;
 			}
 		}
 		fw.close();
