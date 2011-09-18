@@ -23,7 +23,7 @@ import com.analyzepic.AnalyzePic;
 public class ProduceDB {
 
 	private static DefaultHttpClient httpClient = new DefaultHttpClient();
-	private static String hostUrl="http://www.miibeian.gov.cn";
+	private static String hostUrl = "http://www.miibeian.gov.cn";
 	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=baidu.com";
 	private static String resultPath = "d:/easycrawlerresult";
 	private static String charSet = "GBK";
@@ -78,17 +78,16 @@ public class ProduceDB {
 			IOException, ParserException {
 		String verifyCode = getVerifyCode();
 		int totalPageNum = getTotalPageNum(verifyCode);
-		produceResultFile(verifyCode, totalPageNum, resultPath);
+		produceResultFile(verifyCode, totalPageNum);
 	}
 
-	private static void produceResultFile(String verifyCode, int totalPageNum,
-			String path) throws IOException, ParserException {
+	private static void produceResultFile(String verifyCode, int totalPageNum)
+			throws IOException, ParserException {
 		String Url = "";
 		String htmlContent = "";
 		int pageNum = 1;
 		int errorTimes = 0;
-		String[] cellUrl=new String[20];
-		FileWriter fw = new FileWriter(path + "/0.txt");
+		String[] cellUrl = new String[20];
 		HasAttributeFilter nf = new HasAttributeFilter();
 		NodeList list = new NodeList();
 		while (pageNum < totalPageNum) {
@@ -103,69 +102,81 @@ public class ProduceDB {
 				// reget verifyCode
 				verifyCode = getVerifyCode();
 			else {
-				parser = new Parser(htmlContent);
-				nf.setAttributeName("class");
-				nf.setAttributeValue("a");
-				list = parser.extractAllNodesThatMatch(nf);
-				if (list.size() > 0) {
-					errorTimes = 0;
-					if (0 == pageNum % 500) {
-						fw.close();
-						fw = new FileWriter(path + "/"
-								+ String.valueOf(pageNum / 500) + ".txt");
-					}
-					for(int i=0;i<20;i++)
-						cellUrl[i]=hostUrl+((Tag)(list.elementAt(0).getChildren().elementAt(1).getChildren().elementAt(2*i+3).getChildren().elementAt(7).getChildren().elementAt(1))).getAttribute("href");
-					aaa(cellUrl,pageNum);
-					fw.append((CharSequence) list.elementAt(0).toHtml());
-					fw.append("\r\n");
+				cellUrl = getCellUrl(htmlContent);
+				if (cellUrl[0] != "Fail") {
+					errorTimes=0;
+					produceFile(cellUrl, pageNum);
 					pageNum++;
-				} else {
-					System.out.println(errorTimes);
-					if (errorTimes++ > 10) {
-						fw.close();
+				}
+				else {
+					if (errorTimes++ > 5) {
+						System.out.println("Failed to produce at page "
+								+ pageNum);
 						return;
 					}
 				}
+
 			}
 		}
-		fw.close();
 	}
-	
-	private static void aaa(String[] Url, int pageNum) throws IOException, ParserException
-	{
+
+	private static String[] getCellUrl(String htmlContent)
+			throws UnsupportedEncodingException, ClientProtocolException,
+			IOException, ParserException {
+		String[] cellUrl = new String[20];
+
+		HasAttributeFilter nf = new HasAttributeFilter();
+		NodeList list = new NodeList();
+
+		Parser parser = new Parser(htmlContent);
+		nf.setAttributeName("class");
+		nf.setAttributeValue("a");
+		list = parser.extractAllNodesThatMatch(nf);
+		if (list.size() > 0) {
+			for (int i = 0; i < 20; i++)
+				cellUrl[i] = hostUrl
+						+ ((Tag) (list.elementAt(0).getChildren().elementAt(1)
+								.getChildren().elementAt(2 * i + 3)
+								.getChildren().elementAt(7).getChildren()
+								.elementAt(1))).getAttribute("href");
+		} else {
+			cellUrl[0] = "Fail";
+		}
+		return cellUrl;
+	}
+
+	private static void produceFile(String[] Url, int pageNum) throws IOException,
+			ParserException {
 		FileWriter fw = new FileWriter(resultPath + "/0.txt");
 		HasAttributeFilter nf = new HasAttributeFilter();
 		NodeList list = new NodeList();
 		String htmlContent = "";
 		int errorTimes = 0;
-		for(int i=0;i<Url.length;i++)
-		{
-				htmlContent = getResponseAsString(Url[i]);
-				Parser parser = new Parser(htmlContent);
-					nf.setAttributeName("class");
-					nf.setAttributeValue("a");
-					list = parser.extractAllNodesThatMatch(nf);
-					if (list.size() ==2) {
-						errorTimes = 0;
-						if (0 == pageNum % 500) {
-							fw.close();
-							fw = new FileWriter(resultPath + "/"
-									+ String.valueOf(pageNum / 500) + ".txt");
-						}
-						fw.append((CharSequence) list.elementAt(0).toHtml());
-						fw.append((CharSequence) list.elementAt(1).toHtml());
-						fw.append("\r\n");
-					} else {
-						System.out.println(errorTimes);
-						i--;
-						if (errorTimes++ > 5) {
-							fw.close();
-							return;
-						}
-					}
-					
+		for (int i = 0; i < Url.length; i++) {
+			htmlContent = getResponseAsString(Url[i]);
+			Parser parser = new Parser(htmlContent);
+			nf.setAttributeName("class");
+			nf.setAttributeValue("a");
+			list = parser.extractAllNodesThatMatch(nf);
+			if (list.size() == 2) {
+				errorTimes = 0;
+				if (0 == pageNum % 500) {
+					fw.close();
+					fw = new FileWriter(resultPath + "/"
+							+ String.valueOf(pageNum / 500) + ".txt");
+				}
+				fw.append((CharSequence) list.elementAt(0).toHtml());
+				fw.append((CharSequence) list.elementAt(1).toHtml());
+				fw.append("\r\n");
+			} else {
+				System.out.println(errorTimes);
+				i--;
+				if (errorTimes++ > 5) {
+					fw.close();
+					return;
+				}
 			}
-			fw.close();
+		}
+		fw.close();
 	}
 }
