@@ -37,6 +37,13 @@ public class ProduceDB {
 			+ DOMAIN;
 	private static DefaultHttpClient httpClient;
 
+	public static void main(String[] args) throws ClientProtocolException,
+			IOException, ParserException {
+		String verifyCode = getVerifyCode();
+		int totalPageNum = getTotalPageNum(verifyCode);
+		produceResultFile(verifyCode, totalPageNum);
+	}
+
 	private static DefaultHttpClient getHttpClient() {
 		if (httpClient == null) {
 			httpClient = new DefaultHttpClient();
@@ -61,25 +68,19 @@ public class ProduceDB {
 		return entity.getContent();
 	}
 
-	public static void main(String[] args) throws ClientProtocolException,
-			IOException, ParserException {
-		String verifyCode = getVerifyCode();
-		int totalPageNum = getTotalPageNum(verifyCode);
-		produceResultFile(verifyCode, totalPageNum);
-	}
-
 	private static String getResponseAsString(String Url)
 			throws UnsupportedEncodingException, ClientProtocolException,
 			IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				getResponseAsStream(Url), CHARSET));
-		while (!br.ready()) {
+		String htmlLine = "";
+		String htmlContent = "";
+		while ((htmlLine = br.readLine()) == null) {
 			br.close();
 			br = new BufferedReader(new InputStreamReader(
 					getResponseAsStream(Url), CHARSET));
 		}
-		String htmlLine = "";
-		String htmlContent = "";
+
 		while ((htmlLine = br.readLine()) != null) {
 			htmlContent += htmlLine;
 		}
@@ -98,15 +99,29 @@ public class ProduceDB {
 
 	private static int getTotalPageNum(String verifyCode)
 			throws UnsupportedEncodingException, ClientProtocolException,
-			IOException {
+			IOException, ParserException {
 		String Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo=1";
+		HasAttributeFilter af = new HasAttributeFilter("id", "button1");
 		String htmlContent = getResponseAsString(Url);
+		Parser parser = new Parser(htmlContent);
+		NodeList list = parser.extractAllNodesThatMatch(af);
+		while (list.size() > 0) {
+			// reget verifyCode
+			verifyCode = getVerifyCode();
+			Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo=1";
+			htmlContent = getResponseAsString(Url);
+			parser = new Parser(htmlContent);
+			list = parser.extractAllNodesThatMatch(af);
+		}
+
 		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
 		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
 				totalPageNumStart);
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
+
 		return totalPageNum;
+
 	}
 
 	private static void produceResultFile(String verifyCode, int totalPageNum)
@@ -116,35 +131,36 @@ public class ProduceDB {
 		int pageNum = 1;
 		int errorTimes = 0;
 		String[] cellUrl = new String[20];
-		HasAttributeFilter nf = new HasAttributeFilter();
+		HasAttributeFilter af = new HasAttributeFilter("id", "button1");
 		NodeList list = new NodeList();
 		while (pageNum < totalPageNum) {
 			Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo="
 					+ String.valueOf(pageNum);
 			htmlContent = getResponseAsString(Url);
 			Parser parser = new Parser(htmlContent);
-			nf.setAttributeName("id");
-			nf.setAttributeValue("button1");
-			list = parser.extractAllNodesThatMatch(nf);
-			if (list.size() > 0)
+			list = parser.extractAllNodesThatMatch(af);
+			while (list.size() > 0) {
 				// reget verifyCode
 				verifyCode = getVerifyCode();
-			else {
-				cellUrl = getCellUrl(htmlContent);
-				if (cellUrl[0] != "Fail") {
-					errorTimes = 0;
-					produceFile(cellUrl, pageNum);
-					pageNum++;
-				} else {
-					if (errorTimes++ > 5) {
-						System.out.println("Failed to produce at page "
-								+ pageNum);
-						return;
-					}
+				Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo="
+						+ String.valueOf(pageNum);
+				htmlContent = getResponseAsString(Url);
+				parser = new Parser(htmlContent);
+				list = parser.extractAllNodesThatMatch(af);
+			}
+			cellUrl = getCellUrl(htmlContent);
+			if (cellUrl[0] != "Fail") {
+				errorTimes = 0;
+				produceFile(cellUrl, pageNum);
+				pageNum++;
+			} else {
+				if (errorTimes++ > 5) {
+					System.out.println("Failed to produce at page " + pageNum);
+					return;
 				}
-
 			}
 		}
+
 	}
 
 	private static String[] getCellUrl(String htmlContent)
