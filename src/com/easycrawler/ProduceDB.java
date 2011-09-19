@@ -12,6 +12,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.htmlparser.Parser;
 import org.htmlparser.Tag;
 import org.htmlparser.filters.HasAttributeFilter;
@@ -25,20 +27,30 @@ public class ProduceDB {
 	private final static String DOMAIN = "com";
 	private final static String RESULTFILEPATH = "d:/easycrawlerresult/";
 	private final static String CHARSET = "GBK";
+	private final static int TIMEOUT = 180000;
 	// no need to change, hard code
-	private final static DefaultHttpClient httpClient = new DefaultHttpClient();
 	private final static String HOST = "http://www.miibeian.gov.cn/";
 	private static String resultFileName = "0.txt";
 	private final static String BASEURL = HOST
 			+ "icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl="
 			+ DOMAIN;
+	private static DefaultHttpClient httpClient;
+
+	private static DefaultHttpClient getHttpClient() {
+		if (httpClient == null) {
+			httpClient = new DefaultHttpClient();
+			HttpParams params = httpClient.getParams();
+			HttpConnectionParams.setConnectionTimeout(params, TIMEOUT);
+			HttpConnectionParams.setSoTimeout(params, TIMEOUT);
+		}
+		return httpClient;
+
+	}
 
 	private static InputStream getResponseAsStream(String Url)
 			throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(Url);
-		HttpResponse response = httpClient.execute(httpPost);
-		while (response.getStatusLine().getStatusCode() != 200)
-			response = httpClient.execute(httpPost);
+		HttpResponse response = getHttpClient().execute(httpPost);
 		HttpEntity entity = response.getEntity();
 		return entity.getContent();
 	}
