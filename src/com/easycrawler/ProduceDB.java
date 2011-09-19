@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -27,7 +28,7 @@ public class ProduceDB {
 	private final static String DOMAIN = "com";
 	private final static String RESULTFILEPATH = "d:/easycrawlerresult/";
 	private final static String CHARSET = "GBK";
-	private final static int TIMEOUT = 180000;
+	private final static int TIMEOUT = 120000;
 	// no need to change, hard code
 	private final static String HOST = "http://www.miibeian.gov.cn/";
 	private static String resultFileName = "0.txt";
@@ -50,7 +51,12 @@ public class ProduceDB {
 	private static InputStream getResponseAsStream(String Url)
 			throws ClientProtocolException, IOException {
 		HttpPost httpPost = new HttpPost(Url);
-		HttpResponse response = getHttpClient().execute(httpPost);
+		HttpResponse response = null;
+		try {
+			response = getHttpClient().execute(httpPost);
+		} catch (SocketTimeoutException e) {
+			System.out.println(Url);
+		}
 		HttpEntity entity = response.getEntity();
 		return entity.getContent();
 	}
@@ -67,6 +73,11 @@ public class ProduceDB {
 			IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				getResponseAsStream(Url), CHARSET));
+		while (!br.ready()) {
+			br.close();
+			br = new BufferedReader(new InputStreamReader(
+					getResponseAsStream(Url), CHARSET));
+		}
 		String htmlLine = "";
 		String htmlContent = "";
 		while ((htmlLine = br.readLine()) != null) {
