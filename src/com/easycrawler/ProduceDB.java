@@ -194,6 +194,7 @@ public class ProduceDB {
 		NodeList list = new NodeList();
 		String htmlContent = "";
 		int errorTimes = 0;
+		System.out.println("Current PageNum is "+pageNum);
 		for (int i = 0; i < Url.length; i++) {
 			htmlContent = getResponseAsString(Url[i]);
 			Parser parser = new Parser(htmlContent);
