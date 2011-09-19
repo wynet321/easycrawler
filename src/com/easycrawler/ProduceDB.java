@@ -21,12 +21,17 @@ import org.htmlparser.util.ParserException;
 import com.analyzepic.AnalyzePic;
 
 public class ProduceDB {
-
-	private static DefaultHttpClient httpClient = new DefaultHttpClient();
-	private static String hostUrl = "http://www.miibeian.gov.cn";
-	private static String baseUrl = "http://www.miibeian.gov.cn/icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl=baidu.com";
-	private static String resultPath = "d:/easycrawlerresult";
-	private static String charSet = "GBK";
+	// customize if need
+	private final static String DOMAIN = "com";
+	private final static String RESULTFILEPATH = "d:/easycrawlerresult/";
+	private final static String CHARSET = "GBK";
+	// no need to change, hard code
+	private final static DefaultHttpClient httpClient = new DefaultHttpClient();
+	private final static String HOST = "http://www.miibeian.gov.cn/";
+	private static String resultFileName = "0.txt";
+	private final static String BASEURL = HOST
+			+ "icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl="
+			+ DOMAIN;
 
 	private static InputStream getResponseAsStream(String Url)
 			throws ClientProtocolException, IOException {
@@ -38,11 +43,18 @@ public class ProduceDB {
 		return entity.getContent();
 	}
 
+	public static void main(String[] args) throws ClientProtocolException,
+			IOException, ParserException {
+		String verifyCode = getVerifyCode();
+		int totalPageNum = getTotalPageNum(verifyCode);
+		produceResultFile(verifyCode, totalPageNum);
+	}
+
 	private static String getResponseAsString(String Url)
 			throws UnsupportedEncodingException, ClientProtocolException,
 			IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
-				getResponseAsStream(Url), charSet));
+				getResponseAsStream(Url), CHARSET));
 		String htmlLine = "";
 		String htmlContent = "";
 		while ((htmlLine = br.readLine()) != null) {
@@ -64,7 +76,7 @@ public class ProduceDB {
 	private static int getTotalPageNum(String verifyCode)
 			throws UnsupportedEncodingException, ClientProtocolException,
 			IOException {
-		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo=1";
+		String Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo=1";
 		String htmlContent = getResponseAsString(Url);
 		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
 		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
@@ -72,13 +84,6 @@ public class ProduceDB {
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
 		return totalPageNum;
-	}
-
-	public static void main(String[] args) throws ClientProtocolException,
-			IOException, ParserException {
-		String verifyCode = getVerifyCode();
-		int totalPageNum = getTotalPageNum(verifyCode);
-		produceResultFile(verifyCode, totalPageNum);
 	}
 
 	private static void produceResultFile(String verifyCode, int totalPageNum)
@@ -91,7 +96,7 @@ public class ProduceDB {
 		HasAttributeFilter nf = new HasAttributeFilter();
 		NodeList list = new NodeList();
 		while (pageNum < totalPageNum) {
-			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
+			Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo="
 					+ String.valueOf(pageNum);
 			htmlContent = getResponseAsString(Url);
 			Parser parser = new Parser(htmlContent);
@@ -104,11 +109,10 @@ public class ProduceDB {
 			else {
 				cellUrl = getCellUrl(htmlContent);
 				if (cellUrl[0] != "Fail") {
-					errorTimes=0;
+					errorTimes = 0;
 					produceFile(cellUrl, pageNum);
 					pageNum++;
-				}
-				else {
+				} else {
 					if (errorTimes++ > 5) {
 						System.out.println("Failed to produce at page "
 								+ pageNum);
@@ -124,17 +128,13 @@ public class ProduceDB {
 			throws UnsupportedEncodingException, ClientProtocolException,
 			IOException, ParserException {
 		String[] cellUrl = new String[20];
-
-		HasAttributeFilter nf = new HasAttributeFilter();
+		HasAttributeFilter nf = new HasAttributeFilter("class", "a");
 		NodeList list = new NodeList();
-
 		Parser parser = new Parser(htmlContent);
-		nf.setAttributeName("class");
-		nf.setAttributeValue("a");
 		list = parser.extractAllNodesThatMatch(nf);
 		if (list.size() > 0) {
 			for (int i = 0; i < 20; i++)
-				cellUrl[i] = hostUrl
+				cellUrl[i] = HOST
 						+ ((Tag) (list.elementAt(0).getChildren().elementAt(1)
 								.getChildren().elementAt(2 * i + 3)
 								.getChildren().elementAt(7).getChildren()
@@ -145,31 +145,28 @@ public class ProduceDB {
 		return cellUrl;
 	}
 
-	private static void produceFile(String[] Url, int pageNum) throws IOException,
-			ParserException {
-		FileWriter fw = new FileWriter(resultPath + "/0.txt");
-		HasAttributeFilter nf = new HasAttributeFilter();
+	private static void produceFile(String[] Url, int pageNum)
+			throws IOException, ParserException {
+		if (0 == pageNum % 500) {
+			resultFileName = String.valueOf(pageNum / 500) + ".txt";
+		}
+		FileWriter fw = new FileWriter(RESULTFILEPATH + resultFileName, true);
+		HasAttributeFilter nf = new HasAttributeFilter("class", "a");
 		NodeList list = new NodeList();
 		String htmlContent = "";
 		int errorTimes = 0;
 		for (int i = 0; i < Url.length; i++) {
 			htmlContent = getResponseAsString(Url[i]);
 			Parser parser = new Parser(htmlContent);
-			nf.setAttributeName("class");
-			nf.setAttributeValue("a");
 			list = parser.extractAllNodesThatMatch(nf);
 			if (list.size() == 2) {
 				errorTimes = 0;
-				if (0 == pageNum % 500) {
-					fw.close();
-					fw = new FileWriter(resultPath + "/"
-							+ String.valueOf(pageNum / 500) + ".txt");
-				}
 				fw.append((CharSequence) list.elementAt(0).toHtml());
 				fw.append((CharSequence) list.elementAt(1).toHtml());
 				fw.append("\r\n");
 			} else {
 				System.out.println(errorTimes);
+				fw.append("Failed at page: " + pageNum + "\r\n" + htmlContent);
 				i--;
 				if (errorTimes++ > 5) {
 					fw.close();
