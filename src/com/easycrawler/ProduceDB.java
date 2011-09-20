@@ -1,119 +1,40 @@
 package com.easycrawler;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.htmlparser.Parser;
 import org.htmlparser.Tag;
-import org.htmlparser.filters.HasAttributeFilter;
-import org.htmlparser.util.NodeList;
-import org.htmlparser.util.ParserException;
 
 import com.analyzepic.AnalyzePic;
 
 public class ProduceDB {
 	// customize if need
-	private final static String DOMAIN = "com";
-	private final static String RESULTFILEPATH = "d:/easycrawlerresult/";
-	private final static String CHARSET = "GBK";
-	private final static int TIMEOUT = 120000;
-	// no need to change, hard code
-	private final static String HOST = "http://www.miibeian.gov.cn/";
-	private static String resultFileName = "0.txt";
-	private final static String BASEURL = HOST
-			+ "icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl="
-			+ DOMAIN;
-	private static DefaultHttpClient httpClient;
+	private static String domain;
 
-	public static void main(String[] args) throws ClientProtocolException,
-			IOException, ParserException {
+	// no need to change, hard code
+	private static String host;
+	// private static String resultFileName = "0.txt";
+	private static String baseUrl;
+
+	public static void main(String[] args) {
+		domain = ConfigHelper.getString("Domain");
+		host = ConfigHelper.getString("Host");
+		baseUrl = host
+				+ "icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl="
+				+ domain;
 		String verifyCode = getVerifyCode();
 		int totalPageNum = getTotalPageNum(verifyCode);
 		produceResultFile(verifyCode, totalPageNum);
 	}
 
-	private static DefaultHttpClient getHttpClient() {
-		if (httpClient == null) {
-			httpClient = new DefaultHttpClient();
-			HttpParams params = httpClient.getParams();
-			HttpConnectionParams.setConnectionTimeout(params, TIMEOUT);
-			HttpConnectionParams.setSoTimeout(params, TIMEOUT);
-		}
-		return httpClient;
-
-	}
-
-	private static InputStream getResponseAsStream(String Url)
-			throws ClientProtocolException, IOException {
-		HttpPost httpPost = new HttpPost(Url);
-		HttpResponse response = null;
-		try {
-			response = getHttpClient().execute(httpPost);
-		} catch (SocketTimeoutException e) {
-			System.out.println(Url);
-		}
-		HttpEntity entity = response.getEntity();
-		return entity.getContent();
-	}
-
-	private static String getResponseAsString(String Url)
-			throws UnsupportedEncodingException, ClientProtocolException,
-			IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				getResponseAsStream(Url), CHARSET));
-		String htmlLine = "";
-		String htmlContent = "";
-		while ((htmlLine = br.readLine()) == null) {
-			br.close();
-			br = new BufferedReader(new InputStreamReader(
-					getResponseAsStream(Url), CHARSET));
-		}
-
-		while ((htmlLine = br.readLine()) != null) {
-			htmlContent += htmlLine;
-		}
-		br.close();
-		return htmlContent;
-	}
-
-	private static String getVerifyCode() throws ClientProtocolException,
-			IOException {
+	private static String getVerifyCode() {
 		String Url = "http://www.miibeian.gov.cn/validateCode";
 		AnalyzePic ap = new AnalyzePic();
-		String result = String.valueOf(ap.getResult(getResponseAsStream(Url)));
+		String result = String.valueOf(ap.getResult(HttpHelper
+				.getResponseAsStream(Url)));
 		// System.out.println(result);
 		return result;
 	}
 
-	private static int getTotalPageNum(String verifyCode)
-			throws UnsupportedEncodingException, ClientProtocolException,
-			IOException, ParserException {
-		String Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo=1";
-		HasAttributeFilter af = new HasAttributeFilter("id", "button1");
-		String htmlContent = getResponseAsString(Url);
-		Parser parser = new Parser(htmlContent);
-		NodeList list = parser.extractAllNodesThatMatch(af);
-		while (list.size() > 0) {
-			// reget verifyCode
-			verifyCode = getVerifyCode();
-			Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo=1";
-			htmlContent = getResponseAsString(Url);
-			parser = new Parser(htmlContent);
-			list = parser.extractAllNodesThatMatch(af);
-		}
-
+	private static int getTotalPageNum(String verifyCode) {
+		String htmlContent = getValidWebpage(verifyCode, "id", "button1");
 		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
 		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
 				totalPageNumStart);
@@ -124,30 +45,29 @@ public class ProduceDB {
 
 	}
 
-	private static void produceResultFile(String verifyCode, int totalPageNum)
-			throws IOException, ParserException {
-		String Url = "";
+	private static String getValidWebpage(String verifyCode,
+			String attributeName, String attributeValue) {
+		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo=1";
+		String htmlContent = "";
+		htmlContent = HttpHelper.getResponseAsString(Url);
+		WebPageAnalyzer.setNodeList(htmlContent, attributeName, attributeValue);
+		while (WebPageAnalyzer.hasChildNode()) {
+			// reget verifyCode
+			verifyCode = getVerifyCode();
+			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo=1";
+			htmlContent = HttpHelper.getResponseAsString(Url);
+			WebPageAnalyzer.setNodeList(htmlContent, "id", "button1");
+		}
+		return htmlContent;
+	}
+
+	private static void produceResultFile(String verifyCode, int totalPageNum) {
 		String htmlContent = "";
 		int pageNum = 1;
 		int errorTimes = 0;
 		String[] cellUrl = new String[20];
-		HasAttributeFilter af = new HasAttributeFilter("id", "button1");
-		NodeList list = new NodeList();
 		while (pageNum < totalPageNum) {
-			Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo="
-					+ String.valueOf(pageNum);
-			htmlContent = getResponseAsString(Url);
-			Parser parser = new Parser(htmlContent);
-			list = parser.extractAllNodesThatMatch(af);
-			while (list.size() > 0) {
-				// reget verifyCode
-				verifyCode = getVerifyCode();
-				Url = BASEURL + "&verifyCode=" + verifyCode + "&pageNo="
-						+ String.valueOf(pageNum);
-				htmlContent = getResponseAsString(Url);
-				parser = new Parser(htmlContent);
-				list = parser.extractAllNodesThatMatch(af);
-			}
+			htmlContent = getValidWebpage(verifyCode, "id", "button1");
 			cellUrl = getCellUrl(htmlContent);
 			if (cellUrl[0] != "Fail") {
 				errorTimes = 0;
@@ -163,57 +83,49 @@ public class ProduceDB {
 
 	}
 
-	private static String[] getCellUrl(String htmlContent)
-			throws UnsupportedEncodingException, ClientProtocolException,
-			IOException, ParserException {
+	private static String[] getCellUrl(String htmlContent) {
 		String[] cellUrl = new String[20];
-		HasAttributeFilter nf = new HasAttributeFilter("class", "a");
-		NodeList list = new NodeList();
-		Parser parser = new Parser(htmlContent);
-		list = parser.extractAllNodesThatMatch(nf);
-		if (list.size() > 0) {
+		WebPageAnalyzer.setNodeList(htmlContent, "class", "a");
+		if (WebPageAnalyzer.hasChildNode()) {
 			for (int i = 0; i < 20; i++)
-				cellUrl[i] = HOST
-						+ ((Tag) (list.elementAt(0).getChildren().elementAt(1)
-								.getChildren().elementAt(2 * i + 3)
-								.getChildren().elementAt(7).getChildren()
-								.elementAt(1))).getAttribute("href");
+				cellUrl[i] = host
+						+ ((Tag) (WebPageAnalyzer.getNodeList().elementAt(0)
+								.getChildren().elementAt(1).getChildren()
+								.elementAt(2 * i + 3).getChildren()
+								.elementAt(7).getChildren().elementAt(1)))
+								.getAttribute("href");
 		} else {
 			cellUrl[0] = "Fail";
 		}
 		return cellUrl;
 	}
 
-	private static void produceFile(String[] Url, int pageNum)
-			throws IOException, ParserException {
-		if (0 == pageNum % 500) {
-			resultFileName = String.valueOf(pageNum / 500) + ".txt";
-		}
-		FileWriter fw = new FileWriter(RESULTFILEPATH + resultFileName, true);
-		HasAttributeFilter nf = new HasAttributeFilter("class", "a");
-		NodeList list = new NodeList();
+	private static void produceFile(String[] Url, int pageNum) {
 		String htmlContent = "";
 		int errorTimes = 0;
-		System.out.println("Current PageNum is "+pageNum);
+		System.out.println("Current PageNum is " + pageNum);
 		for (int i = 0; i < Url.length; i++) {
-			htmlContent = getResponseAsString(Url[i]);
-			Parser parser = new Parser(htmlContent);
-			list = parser.extractAllNodesThatMatch(nf);
-			if (list.size() == 2) {
+			htmlContent = HttpHelper.getResponseAsString(Url[i]);
+			WebPageAnalyzer.setNodeList(htmlContent, "class", "a");
+			if (WebPageAnalyzer.getNodeList().size() == 2) {
 				errorTimes = 0;
-				fw.append((CharSequence) list.elementAt(0).toHtml());
-				fw.append((CharSequence) list.elementAt(1).toHtml());
-				fw.append("\r\n");
+				ContainerHelper.append((CharSequence) WebPageAnalyzer
+						.getNodeList().elementAt(0).toHtml()
+						+ "\r\n", pageNum);
+				ContainerHelper.append((CharSequence) WebPageAnalyzer
+						.getNodeList().elementAt(1).toHtml()
+						+ "\r\n", pageNum);
 			} else {
 				System.out.println(errorTimes);
-				fw.append("Failed at page: " + pageNum + "\r\n" + htmlContent);
+				ContainerHelper.append("Failed at page: " + pageNum + "\r\n"
+						+ htmlContent, pageNum);
 				i--;
 				if (errorTimes++ > 5) {
-					fw.close();
+					ContainerHelper.close();
 					return;
 				}
 			}
 		}
-		fw.close();
+		ContainerHelper.close();
 	}
 }
