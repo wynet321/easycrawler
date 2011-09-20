@@ -243,11 +243,11 @@ public class AnalyzePic {
 	private boolean isPointAround(int x, int y) {
 		if (x - 1 >= 0 && 1 == matrix[x - 1][y])
 			return true;
-		if (x + 1 <= matrix.length && 1 == matrix[x + 1][y])
+		if (x + 1 < matrix.length && 1 == matrix[x + 1][y])
 			return true;
 		if (y - 1 >= 0 && 1 == matrix[x][y - 1])
 			return true;
-		if (y + 1 <= matrix[0].length && 1 == matrix[x][y + 1])
+		if (y + 1 < matrix[0].length && 1 == matrix[x][y + 1])
 			return true;
 		return false;
 	}
