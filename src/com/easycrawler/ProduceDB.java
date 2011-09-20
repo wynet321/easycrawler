@@ -126,6 +126,5 @@ public class ProduceDB {
 				}
 			}
 		}
-		ContainerHelper.close();
 	}
 }

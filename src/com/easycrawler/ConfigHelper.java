@@ -7,7 +7,7 @@ public class ConfigHelper extends DOMHelper {
 	private static String FILENAME = "Config.xml";
 
 	public static Document getDoc() {
-		return getDoc(FILENAME);
+		return getDoc("bin/"+FILENAME);
 	}
 
 	public static String getString(String tagName) {
