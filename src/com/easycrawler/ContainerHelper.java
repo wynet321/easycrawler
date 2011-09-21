@@ -1,7 +1,6 @@
 package com.easycrawler;
 
 import java.io.FileWriter;
-import java.io.IOException;
 
 public class ContainerHelper {
 	private static String resultPath;
@@ -19,7 +18,7 @@ public class ContainerHelper {
 			try {
 				fw.close();
 				fw = new FileWriter(resultPath + fileName, true);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Logger.write("ContainerHelper.getFileWriter", Logger.DEBUG);
 				e.printStackTrace();
 			}
@@ -30,7 +29,7 @@ public class ContainerHelper {
 	public static void append(String content, int pageNum) {
 		try {
 			getFileWriter(pageNum).append(content);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Logger.write("ContainerHelper.append- content: " + content
 					+ "\r\npageNum: " + pageNum, Logger.DEBUG);
 			e.printStackTrace();
@@ -40,7 +39,7 @@ public class ContainerHelper {
 	public static void close() {
 		try {
 			getFileWriter(0).close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Logger.write("ContainerHelper.close", Logger.DEBUG);
 			e.printStackTrace();
 		}

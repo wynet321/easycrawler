@@ -74,6 +74,7 @@ public class ProduceDB {
 				produceFile(cellUrl, pageNum);
 				pageNum++;
 			} else {
+				errorTimes++;
 				if (errorTimes++ > 5) {
 					System.out.println("Failed to produce at page " + pageNum);
 					return;

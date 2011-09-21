@@ -33,7 +33,8 @@ public class HttpHelper {
 
 	public static InputStream getResponseAsStream(String Url) {
 		HttpResponse response = getResponse(Url);
-		while (response == null)
+		while (response == null
+				|| response.getStatusLine().getStatusCode() != 200)
 			response = getResponse(Url);
 		HttpEntity entity = response.getEntity();
 		InputStream resultStream = null;
