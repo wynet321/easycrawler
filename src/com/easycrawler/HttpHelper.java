@@ -1,10 +1,8 @@
 package com.easycrawler;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -33,60 +31,62 @@ public class HttpHelper {
 
 	public static InputStream getResponseAsStream(String Url) {
 		HttpResponse response = getResponse(Url);
-		while (response == null
-				|| response.getStatusLine().getStatusCode() != 200)
-			response = getResponse(Url);
 		HttpEntity entity = response.getEntity();
 		InputStream resultStream = null;
 		try {
 			resultStream = entity.getContent();
 		} catch (Exception e) {
+			Logger.write("HttpHelper.getResponseAsStream: " + Url, Logger.DEBUG);
 			e.printStackTrace();
 		}
 		return resultStream;
 	}
 
 	private static HttpResponse getResponse(String Url) {
-		HttpPost httpPost = new HttpPost(Url);
+		HttpPost httpPost = null;
 		HttpResponse response = null;
-		try {
-			response = getHttpClient().execute(httpPost);
-		} catch (Exception e) {
-			e.printStackTrace();
+		while (response == null
+				|| response.getStatusLine().getStatusCode() != 200) {
+			httpPost = new HttpPost(Url);
+			try {
+				response = getHttpClient().execute(httpPost);
+			} catch (Exception e) {
+				httpPost.abort();
+				Logger.write("HttpHelper.getResponse: " + Url, Logger.DEBUG);
+				e.printStackTrace();
+			}
 		}
 		return response;
 	}
 
-	public static String getResponseAsString(String Url) {
+	private static BufferedReader getBufferedReaderFromStream(InputStream is) {
 		InputStreamReader isr = null;
 		try {
-			isr = new InputStreamReader(getResponseAsStream(Url), Charset);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
+			isr = new InputStreamReader(is, Charset);
+		} catch (Exception e) {
+			Logger.write("HttpHelper.getBufferedReaderFromStream", Logger.DEBUG);
 			e.printStackTrace();
 		}
 		BufferedReader br = new BufferedReader(isr);
+		return br;
+	}
+
+	public static String getResponseAsString(String Url) {
+		BufferedReader br;
 		String htmlLine = "";
 		String htmlContent = "";
-		try {
-			while ((htmlLine = br.readLine()) == null) {
-				br.close();
-				try {
-					isr = new InputStreamReader(getResponseAsStream(Url),
-							Charset);
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		while (0 == htmlContent.length()) {
+			br = getBufferedReaderFromStream(getResponseAsStream(Url));
+			try {
+				while ((htmlLine = br.readLine()) != null) {
+					htmlContent += htmlLine;
 				}
-				br = new BufferedReader(isr);
+				br.close();
+			} catch (Exception e) {
+				Logger.write("HttpHelper.getResponseAsString: " + Url,
+						Logger.DEBUG);
+				e.printStackTrace();
 			}
-			htmlContent = htmlLine;
-			while ((htmlLine = br.readLine()) != null) {
-				htmlContent += htmlLine;
-			}
-			br.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return htmlContent;
 	}

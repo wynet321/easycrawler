@@ -13,10 +13,11 @@ public class ContainerHelper {
 			pagePerFile = Integer
 					.valueOf(ConfigHelper.getString("PagePerFile"));
 		}
-		if (0 == pageNum % 100) {
+		if (0 == (pageNum-1) % 100) {
 			String fileName = String.valueOf(pageNum / pagePerFile) + ".txt";
 			try {
-				fw.close();
+				if(fw!=null)
+					fw.close();
 				fw = new FileWriter(resultPath + fileName, true);
 			} catch (Exception e) {
 				Logger.write("ContainerHelper.getFileWriter", Logger.DEBUG);
@@ -29,6 +30,7 @@ public class ContainerHelper {
 	public static void append(String content, int pageNum) {
 		try {
 			getFileWriter(pageNum).append(content);
+			getFileWriter(pageNum).flush();
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.append- content: " + content
 					+ "\r\npageNum: " + pageNum, Logger.DEBUG);

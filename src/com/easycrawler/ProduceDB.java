@@ -40,7 +40,7 @@ public class ProduceDB {
 				totalPageNumStart);
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
-
+		System.out.println("Total Page Num: "+totalPageNum);
 		return totalPageNum;
 
 	}

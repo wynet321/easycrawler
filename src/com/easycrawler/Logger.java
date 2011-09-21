@@ -14,20 +14,20 @@ public class Logger {
 		if (fw == null) {
 			resultPath = ConfigHelper.getString("ResultPath");
 			logLevel = Integer.valueOf(ConfigHelper.getString("LogLevel"));
-		}
-		try {
-			fw = new FileWriter(resultPath + "log.txt", true);
-		} catch (Exception e) {
-			e.printStackTrace();
+			try {
+				fw = new FileWriter(resultPath + "log.txt", true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return fw;
 	}
 
 	public static void write(String Content, int logCategory) {
-		if (logCategory > logLevel)
+		if (logCategory >= logLevel)
 			try {
-				getLogger().append(Content);
-				getLogger().close();
+				getLogger().append(Content+"\r\n");
+				getLogger().flush();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
