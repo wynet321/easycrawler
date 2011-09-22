@@ -13,7 +13,7 @@ public class ContainerHelper {
 			pagePerFile = Integer
 					.valueOf(ConfigHelper.getString("PagePerFile"));
 		}
-		if (0 == (pageNum - 1) % 100) {
+//		if (0 == (pageNum - 1) % 100) {
 			String fileName = String.valueOf(pageNum / pagePerFile) + ".txt";
 			try {
 				if (fw != null)
@@ -25,7 +25,7 @@ public class ContainerHelper {
 						Logger.ERROR);
 				e.printStackTrace();
 			}
-		}
+	//	}
 		return fw;
 	}
 
