@@ -36,7 +36,7 @@ public class HttpHelper {
 		try {
 			resultStream = entity.getContent();
 		} catch (Exception e) {
-			Logger.write("HttpHelper.getResponseAsStream: " + Url, Logger.DEBUG);
+			Logger.write("HttpHelper.getResponseAsStream: " + Url+"\r\n"+e.getMessage(), Logger.ERROR);
 			e.printStackTrace();
 		}
 		return resultStream;
@@ -52,7 +52,7 @@ public class HttpHelper {
 				response = getHttpClient().execute(httpPost);
 			} catch (Exception e) {
 				httpPost.abort();
-				Logger.write("HttpHelper.getResponse: " + Url, Logger.DEBUG);
+				Logger.write("HttpHelper.getResponse: " + Url+"\r\n"+e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
 			}
 		}
@@ -64,7 +64,7 @@ public class HttpHelper {
 		try {
 			isr = new InputStreamReader(is, Charset);
 		} catch (Exception e) {
-			Logger.write("HttpHelper.getBufferedReaderFromStream", Logger.DEBUG);
+			Logger.write("HttpHelper.getBufferedReaderFromStream"+e.getMessage(), Logger.ERROR);
 			e.printStackTrace();
 		}
 		BufferedReader br = new BufferedReader(isr);
@@ -83,8 +83,8 @@ public class HttpHelper {
 				}
 				br.close();
 			} catch (Exception e) {
-				Logger.write("HttpHelper.getResponseAsString: " + Url,
-						Logger.DEBUG);
+				Logger.write("HttpHelper.getResponseAsString: " + Url+"\r\n"+e.getMessage(),
+						Logger.ERROR);
 				e.printStackTrace();
 			}
 		}

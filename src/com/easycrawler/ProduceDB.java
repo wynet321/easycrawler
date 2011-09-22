@@ -5,12 +5,8 @@ import org.htmlparser.Tag;
 import com.analyzepic.AnalyzePic;
 
 public class ProduceDB {
-	// customize if need
 	private static String domain;
-
-	// no need to change, hard code
 	private static String host;
-	// private static String resultFileName = "0.txt";
 	private static String baseUrl;
 
 	public static void main(String[] args) {
@@ -29,32 +25,35 @@ public class ProduceDB {
 		AnalyzePic ap = new AnalyzePic();
 		String result = String.valueOf(ap.getResult(HttpHelper
 				.getResponseAsStream(Url)));
-		// System.out.println(result);
+		Logger.write("Verify Code: " + result, Logger.INFO);
 		return result;
 	}
 
 	private static int getTotalPageNum(String verifyCode) {
-		String htmlContent = getValidWebpage(verifyCode, "id", "button1");
+		String htmlContent = getValidWebpage(verifyCode, 1, "id", "button1");
 		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
 		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
 				totalPageNumStart);
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
-		System.out.println("Total Page Num: "+totalPageNum);
+		Logger.write("Total Page Num: " + totalPageNum, Logger.INFO);
+		System.out.println("Total Page Num: " + totalPageNum);
 		return totalPageNum;
 
 	}
 
-	private static String getValidWebpage(String verifyCode,
+	private static String getValidWebpage(String verifyCode, int pageNum,
 			String attributeName, String attributeValue) {
-		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo=1";
+		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
+				+ String.valueOf(pageNum);
 		String htmlContent = "";
 		htmlContent = HttpHelper.getResponseAsString(Url);
 		WebPageAnalyzer.setNodeList(htmlContent, attributeName, attributeValue);
 		while (WebPageAnalyzer.hasChildNode()) {
 			// reget verifyCode
 			verifyCode = getVerifyCode();
-			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo=1";
+			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
+					+ String.valueOf(pageNum);
 			htmlContent = HttpHelper.getResponseAsString(Url);
 			WebPageAnalyzer.setNodeList(htmlContent, "id", "button1");
 		}
@@ -67,7 +66,7 @@ public class ProduceDB {
 		int errorTimes = 0;
 		String[] cellUrl = new String[20];
 		while (pageNum < totalPageNum) {
-			htmlContent = getValidWebpage(verifyCode, "id", "button1");
+			htmlContent = getValidWebpage(verifyCode, pageNum, "id", "button1");
 			cellUrl = getCellUrl(htmlContent);
 			if (cellUrl[0] != "Fail") {
 				errorTimes = 0;
