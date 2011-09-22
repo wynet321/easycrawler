@@ -8,13 +8,15 @@ public class ProduceDB {
 	private static String domain;
 	private static String host;
 	private static String baseUrl;
+	private static int pageSize;
 
 	public static void main(String[] args) {
 		domain = ConfigHelper.getString("Domain");
 		host = ConfigHelper.getString("Host");
+		pageSize = Integer.valueOf(ConfigHelper.getString("PageSize"));
 		baseUrl = host
-				+ "icp/publish/query/icpMemoInfo_searchExecute.action?siteUrl="
-				+ domain;
+				+ "icp/publish/query/icpMemoInfo_searchExecute.action?page.pageSize="
+				+ String.valueOf(pageSize) + "&siteUrl=" + domain;
 		String verifyCode = getVerifyCode();
 		int totalPageNum = getTotalPageNum(verifyCode);
 		produceResultFile(verifyCode, totalPageNum);
@@ -65,7 +67,7 @@ public class ProduceDB {
 		String htmlContent = "";
 		int pageNum = 1;
 		int errorTimes = 0;
-		String[] cellUrl = new String[20];
+		String[] cellUrl = new String[pageSize];
 		while (pageNum < totalPageNum) {
 			htmlContent = getValidWebpage(verifyCode, pageNum, "id", "button1");
 			cellUrl = getCellUrl(htmlContent);
@@ -86,10 +88,10 @@ public class ProduceDB {
 	}
 
 	private static String[] getCellUrl(String htmlContent) {
-		String[] cellUrl = new String[20];
+		String[] cellUrl = new String[pageSize];
 		WebPageAnalyzer.setNodeList(htmlContent, "class", "a");
 		if (WebPageAnalyzer.hasChildNode()) {
-			for (int i = 0; i < 20; i++)
+			for (int i = 0; i < pageSize; i++)
 				cellUrl[i] = host
 						+ ((Tag) (WebPageAnalyzer.getNodeList().elementAt(0)
 								.getChildren().elementAt(1).getChildren()
