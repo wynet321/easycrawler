@@ -51,10 +51,11 @@ public class Logger {
 	}
 
 	public static void write(String Content, int logCategory) {
+		FileWriter temp=getLogger();
 		if (logCategory <= logLevel)
 			try {
-				getLogger().append(getCurrentTime() + " - " + Content + "\r\n");
-				getLogger().flush();
+				temp.append(getCurrentTime() + " - " + Content + "\r\n");
+				temp.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
