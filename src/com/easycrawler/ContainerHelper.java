@@ -13,14 +13,16 @@ public class ContainerHelper {
 			pagePerFile = Integer
 					.valueOf(ConfigHelper.getString("PagePerFile"));
 		}
-		if (0 == (pageNum-1) % 100) {
+		if (0 == (pageNum - 1) % 100) {
 			String fileName = String.valueOf(pageNum / pagePerFile) + ".txt";
 			try {
-				if(fw!=null)
+				if (fw != null)
 					fw.close();
 				fw = new FileWriter(resultPath + fileName, true);
 			} catch (Exception e) {
-				Logger.write("ContainerHelper.getFileWriter", Logger.DEBUG);
+				Logger.write(
+						"ContainerHelper.getFileWriter: " + e.getMessage(),
+						Logger.ERROR);
 				e.printStackTrace();
 			}
 		}
@@ -33,7 +35,8 @@ public class ContainerHelper {
 			getFileWriter(pageNum).flush();
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.append- content: " + content
-					+ "\r\npageNum: " + pageNum, Logger.DEBUG);
+					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
+					Logger.ERROR);
 			e.printStackTrace();
 		}
 	}
@@ -42,7 +45,8 @@ public class ContainerHelper {
 		try {
 			getFileWriter(0).close();
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.close", Logger.DEBUG);
+			Logger.write("ContainerHelper.close\r\n" + e.getMessage(),
+					Logger.ERROR);
 			e.printStackTrace();
 		}
 	}

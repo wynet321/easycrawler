@@ -7,20 +7,19 @@ public class ConfigHelper extends DOMHelper {
 	private static String FILENAME = "Config.xml";
 
 	public static Document getDoc() {
-		return getDoc("bin/"+FILENAME);
+		return getDoc("bin/" + FILENAME);
 	}
 
 	public static String getString(String tagName) {
-
 		try {
 			Element elm = (Element) getDoc().getElementsByTagName(tagName)
 					.item(0);
 			return elm.getFirstChild().getNodeValue();
 		} catch (Exception e) {
-			System.out.println("Failed to getString!");
+			Logger.write("ConfigHelper.getString() - " + e.getMessage(),
+					Logger.ERROR);
 			e.printStackTrace();
 			return null;
 		}
-
 	}
 }

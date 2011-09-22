@@ -57,6 +57,7 @@ public class ProduceDB {
 			htmlContent = HttpHelper.getResponseAsString(Url);
 			WebPageAnalyzer.setNodeList(htmlContent, "id", "button1");
 		}
+		Logger.write("Fetch URL: " + Url, Logger.INFO);
 		return htmlContent;
 	}
 
@@ -75,6 +76,7 @@ public class ProduceDB {
 			} else {
 				errorTimes++;
 				if (errorTimes++ > 5) {
+					Logger.write("Failed page number: " + pageNum, Logger.ERROR);
 					System.out.println("Failed to produce at page " + pageNum);
 					return;
 				}
@@ -116,11 +118,13 @@ public class ProduceDB {
 						.getNodeList().elementAt(1).toHtml()
 						+ "\r\n", pageNum);
 			} else {
-				System.out.println(errorTimes);
+				System.out.println(errorTimes++);
 				ContainerHelper.append("Failed at page: " + pageNum + "\r\n"
 						+ htmlContent, pageNum);
 				i--;
-				if (errorTimes++ > 5) {
+				if (errorTimes > 5) {
+					Logger.write("ProduceDB-produceFile Failed at page: "
+							+ pageNum + "\r\n" + htmlContent, Logger.INFO);
 					ContainerHelper.close();
 					return;
 				}

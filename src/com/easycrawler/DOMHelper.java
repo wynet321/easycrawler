@@ -1,7 +1,6 @@
 package com.easycrawler;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -17,9 +16,11 @@ public class DOMHelper {
 
 		try {
 			docBuilder = docFactory.newDocumentBuilder();
-		} catch (Exception e1) {
-			System.out.println("Failed to create doc factory!");
-			e1.printStackTrace();
+		} catch (Exception e) {
+			Logger.write(
+					"DOMHelper-getDocBuilder: Failed to create doc factory!\r\n"
+							+ e.getMessage(), Logger.ERROR);
+			e.printStackTrace();
 			System.exit(1);
 		}
 		return docBuilder;
@@ -30,17 +31,19 @@ public class DOMHelper {
 		FileInputStream fin = null;
 		try {
 			fin = new FileInputStream(fileName);
-		} catch (FileNotFoundException e2) {
-			System.out.println("XML can't be found!");
-			e2.printStackTrace();
+		} catch (Exception e) {
+			Logger.write("DOMHelper-getDoc(String): XML can't be found!\r\n"
+					+ e.getMessage(), Logger.ERROR);
+			e.printStackTrace();
 			System.exit(1);
 		}
 		Document doc = null;
 		try {
 			doc = getDocBuilder().parse(fin);
-		} catch (Exception e3) {
-			System.out.println("Failed to analyse xml!");
-			e3.printStackTrace();
+		} catch (Exception e) {
+			Logger.write("DOMHelper-getDoc(String): Failed to analyse xml!\r\n"
+					+ e.getMessage(), Logger.ERROR);
+			e.printStackTrace();
 			System.exit(1);
 		}
 		return doc;
@@ -50,9 +53,11 @@ public class DOMHelper {
 		Document doc = null;
 		try {
 			doc = getDocBuilder().parse(is);
-		} catch (Exception e3) {
-			System.out.println("Failed to analyse xml!");
-			e3.printStackTrace();
+		} catch (Exception e) {
+			Logger.write(
+					"DOMHelper-getDoc(InputStream): Failed to analyse xml!\r\n"
+							+ e.getMessage(), Logger.ERROR);
+			e.printStackTrace();
 			System.exit(1);
 		}
 		return doc;

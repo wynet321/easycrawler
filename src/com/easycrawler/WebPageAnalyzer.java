@@ -5,7 +5,7 @@ import org.htmlparser.filters.HasAttributeFilter;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
-public class WebPageAnalyzer{
+public class WebPageAnalyzer {
 	public static NodeList list;
 
 	public static boolean hasChildNode() {
@@ -21,7 +21,8 @@ public class WebPageAnalyzer{
 			parser = new Parser(webPageContent);
 			list = parser.extractAllNodesThatMatch(haf);
 		} catch (ParserException e) {
-			// TODO Auto-generated catch block
+			Logger.write("WebPageAnalyzer.setNodeList() - " + e.getMessage(),
+					Logger.ERROR);
 			e.printStackTrace();
 		}
 	}
