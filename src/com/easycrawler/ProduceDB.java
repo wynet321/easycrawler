@@ -89,10 +89,10 @@ public class ProduceDB {
 	}
 
 	private static String[] getCellUrl(String htmlContent) {
-		String[] cellUrl = new String[pageSize];
 		WebPageAnalyzer.setNodeList(htmlContent, "class", "a");
+		String[] cellUrl = new String[WebPageAnalyzer.getChildNodeNum()];
 		if (WebPageAnalyzer.hasChildNode()) {
-			for (int i = 0; i < pageSize; i++)
+			for (int i = 0; i < WebPageAnalyzer.getChildNodeNum(); i++)
 				cellUrl[i] = host
 						+ ((Tag) (WebPageAnalyzer.getNodeList().elementAt(0)
 								.getChildren().elementAt(1).getChildren()
@@ -120,7 +120,10 @@ public class ProduceDB {
 				// ContainerHelper.append((CharSequence) WebPageAnalyzer
 				// .getNodeList().elementAt(1).toHtml()
 				// + "\r\n", pageNum);
-				ContainerHelper.append(WebPageAnalyzer.getNodeList(), pageNum);
+				
+				//Append id into db
+				
+				ContainerHelper.append(Url[i].substring(Url[i].indexOf("id=")+3),WebPageAnalyzer.getNodeList(), pageNum);
 
 			} else {
 				System.out.println(errorTimes++);

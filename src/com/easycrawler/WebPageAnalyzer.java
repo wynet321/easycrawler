@@ -11,6 +11,10 @@ public class WebPageAnalyzer {
 	public static boolean hasChildNode() {
 		return (list.size() > 0) ? true : false;
 	}
+	
+	public static int getChildNodeNum() {
+		return (list.elementAt(0).getChildren().elementAt(1).getChildren().size()-5)/2;
+	}
 
 	public static void setNodeList(String webPageContent, String attributeName,
 			String attributeValue) {

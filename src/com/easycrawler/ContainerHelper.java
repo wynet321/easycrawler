@@ -1,6 +1,8 @@
 package com.easycrawler;
 
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.htmlparser.util.NodeList;
 
@@ -42,9 +44,9 @@ public class ContainerHelper {
 		}
 	}
 
-	public static void append(NodeList list, int pageNum) {
+	public static void append(String id, NodeList list, int pageNum) {
 		try {
-			getFileWriter(pageNum).append(getRegisterInfo(list));
+			getFileWriter(pageNum).append(getRegisterInfo(id, list));
 			getFileWriter(pageNum).flush();
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.append- list.Length: " + list.size()
@@ -89,33 +91,42 @@ public class ContainerHelper {
 	//
 	// }
 
-	private static String getRegisterInfo(NodeList list) {
-		String registerInfo = "";
-		registerInfo += list.elementAt(0).getChildren().elementAt(1).getChildren().elementAt(1)
-				.getChildren().elementAt(3).toPlainTextString()
+	@SuppressWarnings("deprecation")
+	private static String getRegisterInfo(String id, NodeList list) {
+		String registerInfo = id + "    ";
+		registerInfo += new SimpleDateFormat("yyyy-MM-dd").format(new Date(list
+				.elementAt(0).getChildren().elementAt(1).getChildren()
+				.elementAt(1).getChildren().elementAt(7).toPlainTextString()))
 				+ "    ";
-		registerInfo += list.elementAt(0).getChildren().elementAt(1).getChildren().elementAt(1)
-				.getChildren().elementAt(7).toPlainTextString()
+		registerInfo += list.elementAt(0).getChildren().elementAt(1)
+				.getChildren().elementAt(3).getChildren().elementAt(3)
+				.toPlainTextString()
 				+ "    ";
-		registerInfo = list.elementAt(0).getChildren().elementAt(1).getChildren()
-				.elementAt(3).getChildren().elementAt(3).toPlainTextString()
+		registerInfo += list.elementAt(0).getChildren().elementAt(1)
+				.getChildren().elementAt(3).getChildren().elementAt(7)
+				.toPlainTextString()
 				+ "    ";
-		registerInfo += list.elementAt(0).getChildren().elementAt(1).getChildren()
-		.elementAt(3).getChildren().elementAt(7).toPlainTextString()
+		registerInfo += list.elementAt(1).getChildren().elementAt(1)
+				.getChildren().elementAt(1).getChildren().elementAt(3)
+				.toPlainTextString()
 				+ "    ";
-		registerInfo += list.elementAt(1).getChildren().elementAt(1).getChildren().elementAt(1)
-				.getChildren().elementAt(3).toPlainTextString()
-				+ "    ";
-		NodeList webAddressList = list.elementAt(1).getChildren().elementAt(1).getChildren().elementAt(1).getChildren().elementAt(7).getChildren();
+		NodeList webAddressList = list.elementAt(1).getChildren().elementAt(1)
+				.getChildren().elementAt(1).getChildren().elementAt(7)
+				.getChildren();
 		String webAddress = "";
 		for (int i = 0; i < webAddressList.size(); i++) {
-			webAddress += webAddressList.elementAt(i).toHtml().replaceAll(
-					"<[^>]+>", "")
+			webAddress += webAddressList.elementAt(i).toHtml()
+					.replaceAll("<[^>]+>", "")
 					+ ";";
 		}
 		registerInfo += webAddress + "    ";
-		registerInfo += list.elementAt(1).getChildren().elementAt(1).getChildren()
-				.elementAt(1).getChildren().elementAt(7).toPlainTextString()
+		registerInfo += list.elementAt(1).getChildren().elementAt(1)
+				.getChildren().elementAt(3).getChildren().elementAt(3)
+				.toPlainTextString()
+				+ "    ";
+		registerInfo += list.elementAt(1).getChildren().elementAt(1)
+				.getChildren().elementAt(5).getChildren().elementAt(3)
+				.toPlainTextString()
 				+ "    \r\n";
 		return registerInfo;
 	}
