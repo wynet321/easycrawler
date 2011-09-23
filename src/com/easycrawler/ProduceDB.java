@@ -34,14 +34,7 @@ public class ProduceDB {
 	private static int getTotalPageNum(String verifyCode) {
 		String htmlContent = getValidWebpage(verifyCode, 1, "id", "button1");
 		int totalPageNumStart = htmlContent.indexOf("第1/") + 3;
-		int totalPageNumLength=htmlContent.indexOf("页",totalPageNumStart);
-//		for (int i=0;i<htmlContent.length();i++)
-//			if(htmlContent.charAt(totalPageNumStart+i)<30||htmlContent.charAt(totalPageNumStart+i)>39)
-//			{
-//				totalPageNumLength = i+1;
-//					break;
-//			}
-//		
+		int totalPageNumLength = htmlContent.indexOf("页", totalPageNumStart);
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
 		Logger.write("Total Page Num: " + totalPageNum, Logger.INFO);
@@ -84,7 +77,9 @@ public class ProduceDB {
 			} else {
 				errorTimes++;
 				if (errorTimes++ > 5) {
-					Logger.write("Failed page number: " + pageNum, Logger.ERROR);
+					Logger
+							.write("Failed page number: " + pageNum,
+									Logger.ERROR);
 					System.out.println("Failed to produce at page " + pageNum);
 					return;
 				}
@@ -119,14 +114,14 @@ public class ProduceDB {
 			WebPageAnalyzer.setNodeList(htmlContent, "class", "a");
 			if (WebPageAnalyzer.getNodeList().size() == 2) {
 				errorTimes = 0;
-//				ContainerHelper.append((CharSequence) WebPageAnalyzer
-//						.getNodeList().elementAt(0).toHtml()
-//						+ "\r\n", pageNum);
-//				ContainerHelper.append((CharSequence) WebPageAnalyzer
-//						.getNodeList().elementAt(1).toHtml()
-//						+ "\r\n", pageNum);
-				ContainerHelper.append(WebPageAnalyzer.getNodeList(),pageNum);
-				
+				// ContainerHelper.append((CharSequence) WebPageAnalyzer
+				// .getNodeList().elementAt(0).toHtml()
+				// + "\r\n", pageNum);
+				// ContainerHelper.append((CharSequence) WebPageAnalyzer
+				// .getNodeList().elementAt(1).toHtml()
+				// + "\r\n", pageNum);
+				ContainerHelper.append(WebPageAnalyzer.getNodeList(), pageNum);
+
 			} else {
 				System.out.println(errorTimes++);
 				ContainerHelper.append("Failed at page: " + pageNum + "\r\n"
