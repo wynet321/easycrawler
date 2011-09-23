@@ -113,12 +113,14 @@ public class ProduceDB {
 			WebPageAnalyzer.setNodeList(htmlContent, "class", "a");
 			if (WebPageAnalyzer.getNodeList().size() == 2) {
 				errorTimes = 0;
-				ContainerHelper.append((CharSequence) WebPageAnalyzer
-						.getNodeList().elementAt(0).toHtml()
-						+ "\r\n", pageNum);
-				ContainerHelper.append((CharSequence) WebPageAnalyzer
-						.getNodeList().elementAt(1).toHtml()
-						+ "\r\n", pageNum);
+//				ContainerHelper.append((CharSequence) WebPageAnalyzer
+//						.getNodeList().elementAt(0).toHtml()
+//						+ "\r\n", pageNum);
+//				ContainerHelper.append((CharSequence) WebPageAnalyzer
+//						.getNodeList().elementAt(1).toHtml()
+//						+ "\r\n", pageNum);
+				ContainerHelper.append(WebPageAnalyzer.getNodeList(),pageNum);
+				
 			} else {
 				System.out.println(errorTimes++);
 				ContainerHelper.append("Failed at page: " + pageNum + "\r\n"

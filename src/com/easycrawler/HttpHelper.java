@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 
 public class HttpHelper {
 	private static DefaultHttpClient httpClient;
@@ -36,24 +37,35 @@ public class HttpHelper {
 		try {
 			resultStream = entity.getContent();
 		} catch (Exception e) {
-			Logger.write("HttpHelper.getResponseAsStream: " + Url+"\r\n"+e.getMessage(), Logger.ERROR);
+			Logger.write("HttpHelper.getResponseAsStream: " + Url + "\r\n"
+					+ e.getMessage(), Logger.ERROR);
 			e.printStackTrace();
 		}
 		return resultStream;
 	}
 
 	private static HttpResponse getResponse(String Url) {
-		HttpPost httpPost = null;
+		HttpPost httpPost = new HttpPost(Url);
 		HttpResponse response = null;
-		while (response == null
-				|| response.getStatusLine().getStatusCode() != 200) {
-			httpPost = new HttpPost(Url);
+		try {
+			response = getHttpClient().execute(httpPost);
+		} catch (Exception e) {
+			Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
+					+ e.getMessage(), Logger.ERROR);
+			e.printStackTrace();
+			System.exit(1);
+		}
+		while (response.getStatusLine().getStatusCode() != 200) {
+			// httpPost = new HttpPost(Url);
 			try {
+				EntityUtils.consume(response.getEntity());
 				response = getHttpClient().execute(httpPost);
 			} catch (Exception e) {
-				httpPost.abort();
-				Logger.write("HttpHelper.getResponse: " + Url+"\r\n"+e.getMessage(), Logger.ERROR);
+				// httpPost.abort();
+				Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
+						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
+				System.exit(1);
 			}
 		}
 		return response;
@@ -64,7 +76,8 @@ public class HttpHelper {
 		try {
 			isr = new InputStreamReader(is, Charset);
 		} catch (Exception e) {
-			Logger.write("HttpHelper.getBufferedReaderFromStream"+e.getMessage(), Logger.ERROR);
+			Logger.write("HttpHelper.getBufferedReaderFromStream"
+					+ e.getMessage(), Logger.ERROR);
 			e.printStackTrace();
 		}
 		BufferedReader br = new BufferedReader(isr);
@@ -81,10 +94,11 @@ public class HttpHelper {
 				while ((htmlLine = br.readLine()) != null) {
 					htmlContent += htmlLine;
 				}
+				// htmlContent.replaceAll("&nbsp", "");
 				br.close();
 			} catch (Exception e) {
-				Logger.write("HttpHelper.getResponseAsString: " + Url+"\r\n"+e.getMessage(),
-						Logger.ERROR);
+				Logger.write("HttpHelper.getResponseAsString: " + Url + "\r\n"
+						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
 			}
 		}

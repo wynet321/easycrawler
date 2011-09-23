@@ -26,28 +26,28 @@ public class DOMHelper {
 		return docBuilder;
 	}
 
-	protected static Document getDoc(String fileName) {
-
-		FileInputStream fin = null;
-		try {
-			fin = new FileInputStream(fileName);
-		} catch (Exception e) {
-			Logger.write("DOMHelper-getDoc(String): XML can't be found!\r\n"
-					+ e.getMessage(), Logger.ERROR);
-			e.printStackTrace();
-			System.exit(1);
-		}
-		Document doc = null;
-		try {
-			doc = getDocBuilder().parse(fin);
-		} catch (Exception e) {
-			Logger.write("DOMHelper-getDoc(String): Failed to analyse xml!\r\n"
-					+ e.getMessage(), Logger.ERROR);
-			e.printStackTrace();
-			System.exit(1);
-		}
-		return doc;
-	}
+	 protected static Document getDoc(String fileName) {
+	
+	 FileInputStream fin = null;
+	 try {
+	 fin = new FileInputStream(fileName);
+	 } catch (Exception e) {
+	 Logger.write("DOMHelper-getDoc(String): XML can't be found!\r\n"
+	 + e.getMessage(), Logger.ERROR);
+	 e.printStackTrace();
+	 System.exit(1);
+	 }
+	 Document doc = null;
+	 try {
+	 doc = getDocBuilder().parse(fin);
+	 } catch (Exception e) {
+	 Logger.write("DOMHelper-getDoc(String): Failed to analyse xml!\r\n"
+	 + e.getMessage(), Logger.ERROR);
+	 e.printStackTrace();
+	 System.exit(1);
+	 }
+	 return doc;
+	 }
 
 	protected static Document getDoc(InputStream is) {
 		Document doc = null;
@@ -62,6 +62,20 @@ public class DOMHelper {
 		}
 		return doc;
 	}
+
+	// protected static Document getDoc(String str) {
+	// Document doc = null;
+	// try {
+	// doc = getDocBuilder().parse(new
+	// ByteArrayInputStream(str.getBytes("utf-8")));
+	// } catch (Exception e) {
+	// Logger.write("DOMHelper-getDoc(String): Failed to analyse xml!\r\n"
+	// + e.getMessage()+"\r\nString: "+str, Logger.ERROR);
+	// e.printStackTrace();
+	// System.exit(1);
+	// }
+	// return doc;
+	// }
 
 	// public static String getString(String tagName) {
 	//

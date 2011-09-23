@@ -27,7 +27,7 @@ public class Logger {
 		} else {
 			if (new File(resultPath + "log" + String.valueOf(logFileNum)
 					+ ".txt").length() > 3000000) {
-				if (logFileNum++ > 9)
+				if (logFileNum++ > 8)
 					logFileNum = 0;
 				if (new File(resultPath + "log" + String.valueOf(logFileNum)
 						+ ".txt").exists()) {
