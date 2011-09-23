@@ -68,7 +68,7 @@ public class ProduceDB {
 		int pageNum = 1;
 		int errorTimes = 0;
 		String[] cellUrl = new String[pageSize];
-		while (pageNum < totalPageNum) {
+		while (pageNum <= totalPageNum) {
 			htmlContent = getValidWebpage(verifyCode, pageNum, "id", "button1");
 			cellUrl = getCellUrl(htmlContent);
 			if (cellUrl[0] != "Fail") {

@@ -4,7 +4,7 @@
 	<Domain>baidu.com</Domain>
 	<Charset>GBK</Charset>
 	<HttpTimeOut>300000</HttpTimeOut>
-	<PagePerFile>100</PagePerFile>
+	<PagePerFile>5</PagePerFile>
 	<Host>http://www.miibeian.gov.cn/</Host>
 	<PageSize>10</PageSize>
 </easycrawler>

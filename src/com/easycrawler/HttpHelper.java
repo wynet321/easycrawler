@@ -94,7 +94,7 @@ public class HttpHelper {
 				while ((htmlLine = br.readLine()) != null) {
 					htmlContent += htmlLine;
 				}
-				// htmlContent.replaceAll("&nbsp", "");
+				htmlContent.replaceAll("&nbsp;", "");
 				br.close();
 			} catch (Exception e) {
 				Logger.write("HttpHelper.getResponseAsString: " + Url + "\r\n"
