@@ -33,9 +33,15 @@ public class ProduceDB {
 
 	private static int getTotalPageNum(String verifyCode) {
 		String htmlContent = getValidWebpage(verifyCode, 1, "id", "button1");
-		int totalPageNumStart = htmlContent.indexOf("&nbsp;1/") + 8;
-		int totalPageNumLength = htmlContent.indexOf("&nbsp;",
-				totalPageNumStart);
+		int totalPageNumStart = htmlContent.indexOf("第1/") + 3;
+		int totalPageNumLength=htmlContent.indexOf("页",totalPageNumStart);
+//		for (int i=0;i<htmlContent.length();i++)
+//			if(htmlContent.charAt(totalPageNumStart+i)<30||htmlContent.charAt(totalPageNumStart+i)>39)
+//			{
+//				totalPageNumLength = i+1;
+//					break;
+//			}
+//		
 		int totalPageNum = Integer.valueOf(htmlContent.substring(
 				totalPageNumStart, totalPageNumLength));
 		Logger.write("Total Page Num: " + totalPageNum, Logger.INFO);
