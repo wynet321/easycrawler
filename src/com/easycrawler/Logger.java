@@ -64,7 +64,7 @@ public class Logger {
 	private static String getCurrentTime() {
 		Calendar c = Calendar.getInstance();
 		return String.valueOf(c.get(Calendar.YEAR)) + "/"
-				+ String.valueOf(c.get(Calendar.MONTH)) + "/"
+				+ String.valueOf(c.get(Calendar.MONTH)+1) + "/"
 				+ String.valueOf(c.get(Calendar.DATE)) + " "
 				+ String.valueOf(c.get(Calendar.HOUR)) + ":"
 				+ String.valueOf(c.get(Calendar.MINUTE)) + ":"
