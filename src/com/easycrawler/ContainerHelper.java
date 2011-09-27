@@ -114,9 +114,10 @@ public class ContainerHelper {
 				.getChildren().elementAt(1).getChildren().elementAt(7)
 				.getChildren();
 		String webAddress = "";
-		for (int i = 0; i < webAddressList.size(); i++) {
-			webAddress += webAddressList.elementAt(i).toHtml()
-					.replaceAll("<[^>]+>", "")
+		int listLength = webAddressList.size();
+		for (int i = 0; i < listLength; i++) {
+			webAddress += webAddressList.elementAt(i).toHtml().replaceAll(
+					"<[^>]+>", "")
 					+ ";";
 		}
 		registerInfo += webAddress + "    ";

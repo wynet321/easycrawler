@@ -31,44 +31,36 @@ public class HttpHelper {
 	}
 
 	public static InputStream getResponseAsStream(String Url) {
-		HttpResponse response = getResponse(Url);
-		HttpEntity entity = response.getEntity();
-		InputStream resultStream = null;
-		try {
-			resultStream = entity.getContent();
-		} catch (Exception e) {
-			Logger.write("HttpHelper.getResponseAsStream: " + Url + "\r\n"
-					+ e.getMessage(), Logger.ERROR);
-			e.printStackTrace();
-		}
-		return resultStream;
-	}
-
-	private static HttpResponse getResponse(String Url) {
 		HttpPost httpPost = new HttpPost(Url);
 		HttpResponse response = null;
-		try {
-			response = getHttpClient().execute(httpPost);
-		} catch (Exception e) {
-			Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
-					+ e.getMessage(), Logger.ERROR);
-			e.printStackTrace();
-			System.exit(1);
-		}
-		while (response.getStatusLine().getStatusCode() != 200) {
-			// httpPost = new HttpPost(Url);
+		HttpEntity entity = null;
+		InputStream resultStream = null;
+		while (response == null) {
 			try {
-				EntityUtils.consume(response.getEntity());
 				response = getHttpClient().execute(httpPost);
+				entity = response.getEntity();
+				if (response.getStatusLine().getStatusCode() != 200) {
+					throw new Exception("fda");
+				}
+				resultStream = entity.getContent();
 			} catch (Exception e) {
-				// httpPost.abort();
 				Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
 						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
-				System.exit(1);
+				try {
+					EntityUtils.consume(entity);
+				} catch (Exception e1) {
+					Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
+							+ e1.getMessage(), Logger.ERROR);
+					e1.printStackTrace();
+					System.exit(1);
+				}
+				response = null;
+				continue;
 			}
+
 		}
-		return response;
+		return resultStream;
 	}
 
 	private static BufferedReader getBufferedReaderFromStream(InputStream is) {
@@ -90,7 +82,7 @@ public class HttpHelper {
 		String htmlContent = "";
 		while (0 == htmlContent.length()) {
 			br = getBufferedReaderFromStream(getResponseAsStream(Url));
-			htmlContent="";
+			htmlContent = "";
 			try {
 				while ((htmlLine = br.readLine()) != null) {
 					htmlContent += htmlLine;
