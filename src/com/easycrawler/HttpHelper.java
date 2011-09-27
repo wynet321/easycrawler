@@ -44,13 +44,13 @@ public class HttpHelper {
 				}
 				resultStream = entity.getContent();
 			} catch (Exception e) {
-				Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
+				Logger.write("HttpHelper.getResponseAsStream: " + Url + "\r\n"
 						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
 				try {
 					EntityUtils.consume(entity);
 				} catch (Exception e1) {
-					Logger.write("HttpHelper.getResponse: " + Url + "\r\n"
+					Logger.write("HttpHelper.getResponseAsStream: " + Url + "\r\n"
 							+ e1.getMessage(), Logger.ERROR);
 					e1.printStackTrace();
 					System.exit(1);
