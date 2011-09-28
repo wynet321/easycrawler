@@ -40,7 +40,8 @@ public class HttpHelper {
 				response = getHttpClient().execute(httpPost);
 				entity = response.getEntity();
 				if (response.getStatusLine().getStatusCode() != 200) {
-					throw new Exception("fda");
+					throw new Exception("Wrong status code="
+							+ response.getStatusLine().getStatusCode());
 				}
 				resultStream = entity.getContent();
 			} catch (Exception e) {
@@ -50,8 +51,8 @@ public class HttpHelper {
 				try {
 					EntityUtils.consume(entity);
 				} catch (Exception e1) {
-					Logger.write("HttpHelper.getResponseAsStream: " + Url + "\r\n"
-							+ e1.getMessage(), Logger.ERROR);
+					Logger.write("HttpHelper.getResponseAsStream: " + Url
+							+ "\r\n" + e1.getMessage(), Logger.ERROR);
 					e1.printStackTrace();
 					System.exit(1);
 				}
