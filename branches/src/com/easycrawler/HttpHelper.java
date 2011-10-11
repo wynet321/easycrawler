@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
@@ -17,11 +19,12 @@ public class HttpHelper {
 	private static String Charset;
 	private static int TimeOut;
 
-	private static DefaultHttpClient getHttpClient() {
-		if (httpClient == null) {
+	private static synchronized DefaultHttpClient getHttpClient() {
+        if (httpClient == null) {
+		ClientConnectionManager connectionManager = new ThreadSafeClientConnManager();
 			Charset = ConfigHelper.getString("Charset");
 			TimeOut = Integer.valueOf(ConfigHelper.getString("HttpTimeOut"));
-			httpClient = new DefaultHttpClient();
+			httpClient = new DefaultHttpClient(connectionManager);
 			HttpParams params = httpClient.getParams();
 			HttpConnectionParams.setConnectionTimeout(params, TimeOut);
 			HttpConnectionParams.setSoTimeout(params, TimeOut);
@@ -93,6 +96,16 @@ public class HttpHelper {
 				Logger.write("HttpHelper.getResponseAsString: " + Url + "\r\n"
 						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
+				try{
+					br.close();
+				}catch (Exception e1){
+					Logger.write("HttpHelper.getResponseAsString: Close buffer reader failed.\r\n"
+							+ e.getMessage(), Logger.ERROR);
+					e.printStackTrace();
+					break;
+				}
+				htmlContent="";
+				continue;
 			}
 		}
 		htmlContent = htmlContent.replaceAll("&nbsp;", "");

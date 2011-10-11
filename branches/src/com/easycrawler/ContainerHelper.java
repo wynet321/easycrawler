@@ -7,35 +7,30 @@ import java.util.Date;
 import org.htmlparser.util.NodeList;
 
 public class ContainerHelper {
-	private static String resultPath;
-	private static int pagePerFile;
-	private static FileWriter fw;
+	private String resultPath;
+	private int pagePerFile;
+	private int pageNum;
+	private FileWriter fw;
 
-	private static FileWriter getFileWriter(int pageNum) {
-		if (fw == null) {
-			resultPath = ConfigHelper.getString("ResultPath");
-			pagePerFile = Integer
-					.valueOf(ConfigHelper.getString("PagePerFile"));
-		}
-		// if (0 == (pageNum - 1) % 100) {
-		String fileName = String.valueOf(pageNum / pagePerFile) + ".txt";
+	public ContainerHelper(int pageNum) {
+		resultPath = ConfigHelper.getString("ResultPath");
+		pagePerFile = Integer.valueOf(ConfigHelper.getString("PagePerFile"));
+		this.pageNum = pageNum;
+		String fileName = Thread.currentThread().getName().substring(7)
+				+ String.valueOf(pageNum / pagePerFile) + ".txt";
 		try {
-			if (fw != null)
-				fw.close();
 			fw = new FileWriter(resultPath + fileName, true);
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.getFileWriter: " + e.getMessage(),
 					Logger.ERROR);
 			e.printStackTrace();
 		}
-		// }
-		return fw;
 	}
 
-	public static void append(String content, int pageNum) {
+	public void append(String content) {
 		try {
-			getFileWriter(pageNum).append(content);
-			getFileWriter(pageNum).flush();
+			fw.append(content);
+			fw.flush();
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.append- content: " + content
 					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
@@ -44,10 +39,10 @@ public class ContainerHelper {
 		}
 	}
 
-	public static void append(String id, NodeList list, int pageNum) {
+	public void append(String id, NodeList list) {
 		try {
-			getFileWriter(pageNum).append(getRegisterInfo(id, list));
-			getFileWriter(pageNum).flush();
+			fw.append(getRegisterInfo(id, list));
+			fw.flush();
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.append- list.Length: " + list.size()
 					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
@@ -116,8 +111,8 @@ public class ContainerHelper {
 		String webAddress = "";
 		int listLength = webAddressList.size();
 		for (int i = 0; i < listLength; i++) {
-			webAddress += webAddressList.elementAt(i).toHtml().replaceAll(
-					"<[^>]+>", "")
+			webAddress += webAddressList.elementAt(i).toHtml()
+					.replaceAll("<[^>]+>", "")
 					+ ";";
 		}
 		registerInfo += webAddress + "    ";
@@ -132,9 +127,9 @@ public class ContainerHelper {
 		return registerInfo;
 	}
 
-	public static void close() {
+	public void close() {
 		try {
-			getFileWriter(0).close();
+			fw.close();
 		} catch (Exception e) {
 			Logger.write("ContainerHelper.close\r\n" + e.getMessage(),
 					Logger.ERROR);

@@ -51,10 +51,13 @@ public class Logger {
 	}
 
 	public static void write(String Content, int logCategory) {
-		FileWriter temp=getLogger();
+		FileWriter temp = getLogger();
+		String logResult = getCurrentTime() + " - "
+				+ Thread.currentThread().getName() + " " + Content + "\r\n";
 		if (logCategory <= logLevel)
 			try {
-				temp.append(getCurrentTime() + " - " + Content + "\r\n");
+				System.out.println(logResult);
+				temp.append(logResult);
 				temp.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -64,7 +67,7 @@ public class Logger {
 	private static String getCurrentTime() {
 		Calendar c = Calendar.getInstance();
 		return String.valueOf(c.get(Calendar.YEAR)) + "/"
-				+ String.valueOf(c.get(Calendar.MONTH)+1) + "/"
+				+ String.valueOf(c.get(Calendar.MONTH) + 1) + "/"
 				+ String.valueOf(c.get(Calendar.DATE)) + " "
 				+ String.valueOf(c.get(Calendar.HOUR)) + ":"
 				+ String.valueOf(c.get(Calendar.MINUTE)) + ":"

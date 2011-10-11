@@ -10,7 +10,7 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
-public class AnalyzePic {
+public class PicAnalyzer {
 
 	private final static float SIMILARITYLIMIT = 0.9f;
 	private static int[][] matrix;
