@@ -7,40 +7,33 @@ import java.io.InputStreamReader;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
 public class HttpHelper {
-	private static DefaultHttpClient httpClient;
-	private static String Charset;
-	private static int TimeOut;
+	private DefaultHttpClient httpClient;
+	private String Charset;
+	private int TimeOut;
 
-	private static synchronized DefaultHttpClient getHttpClient() {
-        if (httpClient == null) {
-		ClientConnectionManager connectionManager = new ThreadSafeClientConnManager();
-			Charset = ConfigHelper.getString("Charset");
-			TimeOut = Integer.valueOf(ConfigHelper.getString("HttpTimeOut"));
-			httpClient = new DefaultHttpClient(connectionManager);
-			HttpParams params = httpClient.getParams();
-			HttpConnectionParams.setConnectionTimeout(params, TimeOut);
-			HttpConnectionParams.setSoTimeout(params, TimeOut);
-		}
-		return httpClient;
-
+	public HttpHelper() {
+		Charset = ConfigHelper.getString("Charset");
+		TimeOut = Integer.valueOf(ConfigHelper.getString("HttpTimeOut"));
+		httpClient = new DefaultHttpClient();
+		HttpParams params = httpClient.getParams();
+		HttpConnectionParams.setConnectionTimeout(params, TimeOut);
+		HttpConnectionParams.setSoTimeout(params, TimeOut);
 	}
 
-	public static InputStream getResponseAsStream(String Url) {
+	public InputStream getResponseAsStream(String Url) {
 		HttpPost httpPost = new HttpPost(Url);
 		HttpResponse response = null;
 		HttpEntity entity = null;
 		InputStream resultStream = null;
 		while (response == null) {
 			try {
-				response = getHttpClient().execute(httpPost);
+				response = httpClient.execute(httpPost);
 				entity = response.getEntity();
 				if (response.getStatusLine().getStatusCode() != 200) {
 					throw new Exception("Wrong status code="
@@ -67,7 +60,7 @@ public class HttpHelper {
 		return resultStream;
 	}
 
-	private static BufferedReader getBufferedReaderFromStream(InputStream is) {
+	private BufferedReader getBufferedReaderFromStream(InputStream is) {
 		InputStreamReader isr = null;
 		try {
 			isr = new InputStreamReader(is, Charset);
@@ -80,7 +73,7 @@ public class HttpHelper {
 		return br;
 	}
 
-	public static String getResponseAsString(String Url) {
+	public String getResponseAsString(String Url) {
 		BufferedReader br;
 		String htmlLine = "";
 		String htmlContent = "";
@@ -96,15 +89,16 @@ public class HttpHelper {
 				Logger.write("HttpHelper.getResponseAsString: " + Url + "\r\n"
 						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
-				try{
+				try {
 					br.close();
-				}catch (Exception e1){
-					Logger.write("HttpHelper.getResponseAsString: Close buffer reader failed.\r\n"
-							+ e.getMessage(), Logger.ERROR);
+				} catch (Exception e1) {
+					Logger.write(
+							"HttpHelper.getResponseAsString: Close buffer reader failed.\r\n"
+									+ e.getMessage(), Logger.ERROR);
 					e.printStackTrace();
 					break;
 				}
-				htmlContent="";
+				htmlContent = "";
 				continue;
 			}
 		}

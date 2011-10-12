@@ -14,7 +14,7 @@ public class DBProducer {
 	}
 
 	private static void startThread() {
-		for(int i=0;i<2;++i)
+		for(int i=0;i<5;++i)
 			new SonThread().start();
 		
 	}

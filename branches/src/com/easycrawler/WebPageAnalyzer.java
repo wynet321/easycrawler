@@ -13,19 +13,21 @@ public class WebPageAnalyzer {
 	private static String host;
 	private static String baseUrl;
 	private static int pageSize;
-	private static int totalPageNum;
-	private static String verifyCode;
-	public static NodeList list;
+	private int totalPageNum;
+	private String verifyCode;
+	private NodeList list;
+	private HttpHelper httpHelper;
 
 	public WebPageAnalyzer() {
 		domain = ConfigHelper.getString("Domain");
 		host = ConfigHelper.getString("Host");
+		httpHelper = new HttpHelper();
 		pageSize = Integer.valueOf(ConfigHelper.getString("PageSize"));
 		baseUrl = host
 				+ "icp/publish/query/icpMemoInfo_searchExecute.action?page.pageSize="
 				+ String.valueOf(pageSize) + "&siteUrl=" + domain;
-		totalPageNum = getTotalPageNum();
 		verifyCode = getVerifyCode();
+		totalPageNum = getTotalPageNum();
 		Logger.write("WebPageAnalyzer.WebPageAnalyzer() - baseUrl: " + baseUrl
 				+ "\n totalPageNum: " + totalPageNum, Logger.ERROR);
 	}
@@ -61,7 +63,7 @@ public class WebPageAnalyzer {
 	private String getVerifyCode() {
 		String Url = "http://www.miibeian.gov.cn/validateCode";
 		PicAnalyzer ap = new PicAnalyzer();
-		String result = String.valueOf(ap.getResult(HttpHelper
+		String result = String.valueOf(ap.getResult(httpHelper
 				.getResponseAsStream(Url)));
 		Logger.write(
 				"WebPageAnalyzer.getVerifyCode() - Verify Code: " + result,
@@ -71,10 +73,16 @@ public class WebPageAnalyzer {
 
 	private int getTotalPageNum() {
 		String htmlContent = getValidWebpage(1, "id", "button1");
-		int totalPageNumStart = htmlContent.indexOf("第1/") + 3;
-		int totalPageNumLength = htmlContent.indexOf("页", totalPageNumStart);
-		int totalPageNum = Integer.valueOf(htmlContent.substring(
-				totalPageNumStart, totalPageNumLength));
+		setNodeList(htmlContent, "class", "red");
+		int totalPageNum = Integer.valueOf(list.elementAt(0)
+				.toPlainTextString())
+				/ pageSize + 1;
+		// int totalPageNumStart = htmlContent.indexOf("第 1/") + 3;
+		//Logger.write("WebPageAnalyzer.getTotalPageNum() - totalPageNumStart: "
+		// + totalPageNumStart, Logger.DEBUG);
+		// int totalPageNumLength = htmlContent.indexOf("页", totalPageNumStart);
+		// int totalPageNum = Integer.valueOf(htmlContent.substring(
+		// totalPageNumStart, totalPageNumLength));
 		Logger.write("WebPageAnalyzer.getTotalPageNum() - Total Page Num: "
 				+ totalPageNum, Logger.INFO);
 		return totalPageNum;
@@ -86,17 +94,18 @@ public class WebPageAnalyzer {
 		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 				+ String.valueOf(pageNum);
 		String htmlContent = "";
-		htmlContent = HttpHelper.getResponseAsString(Url);
-		Logger.write("WebPageAnalyzer.getValidWebpage() - Content: " + htmlContent,
-				Logger.INFO);
+		htmlContent = httpHelper.getResponseAsString(Url);
+		// Logger.write("WebPageAnalyzer.getValidWebpage() - Content: " +
+		// htmlContent,
+		// Logger.DEBUG);
 		setNodeList(htmlContent, attributeName, attributeValue);
 		while (hasChildNode()) {
 			// reget verifyCode
 			verifyCode = getVerifyCode();
 			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 					+ String.valueOf(pageNum);
-			htmlContent = HttpHelper.getResponseAsString(Url);
-			setNodeList(htmlContent, "id", "button1");
+			htmlContent = httpHelper.getResponseAsString(Url);
+			setNodeList(htmlContent, attributeName, attributeValue);
 		}
 		Logger.write("WebPageAnalyzer.getValidWebpage() - Fetch URL: " + Url,
 				Logger.INFO);
@@ -149,25 +158,16 @@ public class WebPageAnalyzer {
 		int errorTimes = 0;
 		ContainerHelper container = new ContainerHelper(pageNum);
 		for (int i = 0; i < Url.length; i++) {
-			htmlContent = HttpHelper.getResponseAsString(Url[i]);
+			htmlContent = httpHelper.getResponseAsString(Url[i]);
 			setNodeList(htmlContent, "class", "a");
 			if (getNodeList().size() == 2) {
 				errorTimes = 0;
-				// ContainerHelper.append((CharSequence) WebPageAnalyzer
-				// .getNodeList().elementAt(0).toHtml()
-				// + "\r\n", pageNum);
-				// ContainerHelper.append((CharSequence) WebPageAnalyzer
-				// .getNodeList().elementAt(1).toHtml()
-				// + "\r\n", pageNum);
-
 				// Append id into db
 				container.append(Url[i].substring(Url[i].indexOf("id=") + 3),
 						getNodeList());
-
 			} else {
-				errorTimes++;
 				i--;
-				if (errorTimes > 5) {
+				if (++errorTimes > 5) {
 					container.append("Failed at page: " + pageNum + "\r\n"
 							+ htmlContent);
 					Logger.write("WebPageAnalyzer - File Failed at page: "
@@ -177,5 +177,6 @@ public class WebPageAnalyzer {
 				}
 			}
 		}
+		container.close();
 	}
 }

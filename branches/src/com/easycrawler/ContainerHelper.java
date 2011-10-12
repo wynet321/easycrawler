@@ -17,7 +17,7 @@ public class ContainerHelper {
 		pagePerFile = Integer.valueOf(ConfigHelper.getString("PagePerFile"));
 		this.pageNum = pageNum;
 		String fileName = Thread.currentThread().getName().substring(7)
-				+ String.valueOf(pageNum / pagePerFile) + ".txt";
+				+ String.valueOf((pageNum-1) / pagePerFile) + ".txt";
 		try {
 			fw = new FileWriter(resultPath + fileName, true);
 		} catch (Exception e) {
@@ -32,7 +32,7 @@ public class ContainerHelper {
 			fw.append(content);
 			fw.flush();
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.append- content: " + content
+			Logger.write("ContainerHelper.append - content: " + content
 					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
 					Logger.ERROR);
 			e.printStackTrace();
@@ -44,7 +44,7 @@ public class ContainerHelper {
 			fw.append(getRegisterInfo(id, list));
 			fw.flush();
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.append- list.Length: " + list.size()
+			Logger.write("ContainerHelper.append - list.Length: " + list.size()
 					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
 					Logger.ERROR);
 			e.printStackTrace();
