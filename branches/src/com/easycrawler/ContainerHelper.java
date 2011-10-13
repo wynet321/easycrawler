@@ -16,8 +16,8 @@ public class ContainerHelper {
 		resultPath = ConfigHelper.getString("ResultPath");
 		pagePerFile = Integer.valueOf(ConfigHelper.getString("PagePerFile"));
 		this.pageNum = pageNum;
-		String fileName = Thread.currentThread().getName().substring(7)
-				+ String.valueOf((pageNum-1) / pagePerFile) + ".txt";
+		//String.valueOf(Integer.valueOf(Thread.currentThread().getName())+1)
+		String fileName =String.valueOf(pageNum / pagePerFile) + ".txt";
 		try {
 			fw = new FileWriter(resultPath + fileName, true);
 		} catch (Exception e) {
@@ -111,8 +111,8 @@ public class ContainerHelper {
 		String webAddress = "";
 		int listLength = webAddressList.size();
 		for (int i = 0; i < listLength; i++) {
-			webAddress += webAddressList.elementAt(i).toHtml()
-					.replaceAll("<[^>]+>", "")
+			webAddress += webAddressList.elementAt(i).toHtml().replaceAll(
+					"<[^>]+>", "")
 					+ ";";
 		}
 		registerInfo += webAddress + "    ";

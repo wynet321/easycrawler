@@ -52,7 +52,7 @@ public class Logger {
 
 	public static void write(String Content, int logCategory) {
 		FileWriter temp = getLogger();
-		String logResult = getCurrentTime() + " - "
+		String logResult = getCurrentTime() + " - Thread"
 				+ Thread.currentThread().getName() + " " + Content + "\r\n";
 		if (logCategory <= logLevel)
 			try {

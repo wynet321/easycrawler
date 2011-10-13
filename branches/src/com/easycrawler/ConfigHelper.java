@@ -22,4 +22,8 @@ public class ConfigHelper extends DOMHelper {
 			return null;
 		}
 	}
+
+	public static int getInt(String tagName) {
+		return Integer.valueOf(getString(tagName));
+	}
 }

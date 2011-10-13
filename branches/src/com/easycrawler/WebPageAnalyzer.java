@@ -17,10 +17,12 @@ public class WebPageAnalyzer {
 	private String verifyCode;
 	private NodeList list;
 	private HttpHelper httpHelper;
+	private int threadNum;
 
 	public WebPageAnalyzer() {
 		domain = ConfigHelper.getString("Domain");
 		host = ConfigHelper.getString("Host");
+		threadNum = ConfigHelper.getInt("ThreadNumber");
 		httpHelper = new HttpHelper();
 		pageSize = Integer.valueOf(ConfigHelper.getString("PageSize"));
 		baseUrl = host
@@ -93,8 +95,9 @@ public class WebPageAnalyzer {
 			String attributeValue) {
 		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 				+ String.valueOf(pageNum);
-		Logger.write("WebPageAnalyzer.getValidWebpage() - Start fetching page: "
-				+ pageNum, Logger.DEBUG);
+		Logger.write(
+				"WebPageAnalyzer.getValidWebpage() - Start fetching page: "
+						+ pageNum, Logger.DEBUG);
 		String htmlContent = "";
 		htmlContent = httpHelper.getResponseAsString(Url);
 		setNodeList(htmlContent, attributeName, attributeValue);
@@ -122,7 +125,12 @@ public class WebPageAnalyzer {
 						"WebPageAnalyzer.produceResultFile() - Start getting all pages.",
 						Logger.DEBUG);
 		String htmlContent = "";
-		int pageNum = 1;
+		// int pageNum = 1;
+		int pageNumPerThread = totalPageNum / threadNum;
+		totalPageNum = (Integer.valueOf(Thread.currentThread().getName()))
+				* pageNumPerThread;
+		int pageNum = (Integer.valueOf(Thread.currentThread().getName()) - 1)
+				* pageNumPerThread + 1;
 		int errorTimes = 0;
 		String[] cellUrl = new String[pageSize];
 		while (pageNum <= totalPageNum) {

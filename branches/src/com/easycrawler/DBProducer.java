@@ -9,13 +9,13 @@ public class DBProducer {
 	}
 
 	private static void startThread() {
-		int threadNum=10;
+		int threadNum = 10;
 		Thread[] sonThreads = new Thread[threadNum];
 		for (int i = 1; i < threadNum; ++i) {
-			sonThreads[i]=new SonThread();
+			sonThreads[i] = new SonThread(String.valueOf(i));
 			sonThreads[i].start();
 			try {
-				long randomTime = new Random().nextInt(20) * 1000;
+				long randomTime = (new Random().nextInt(10) + 20) * 1000;
 				Logger.write("SonThread.startThread() - Sleeping: "
 						+ randomTime, Logger.INFO);
 				Thread.sleep(randomTime);

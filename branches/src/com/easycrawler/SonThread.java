@@ -2,11 +2,14 @@ package com.easycrawler;
 
 public class SonThread extends Thread {
 
-public void run()
-	{
-		Logger.write(getName()+" Started.", Logger.INFO);
-		//work
+	public SonThread(String threadName) {
+		super(threadName);
+	}
+
+	public void run() {
+		Logger.write(" Started.", Logger.INFO);
+		// work
 		new WebPageAnalyzer().produceResultFile();
-		Logger.write(getName()+" Completed.", Logger.INFO);
+		Logger.write(" Completed.", Logger.INFO);
 	}
 }

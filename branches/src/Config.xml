@@ -4,7 +4,8 @@
 	<Domain>.com</Domain>
 	<Charset>GBK</Charset>
 	<HttpTimeOut>300000</HttpTimeOut>
-	<PagePerFile>10</PagePerFile>
+	<PagePerFile>100</PagePerFile>
 	<Host>http://www.miibeian.gov.cn/</Host>
-	<PageSize>1000</PageSize>
+	<PageSize>100</PageSize>
+	<ThreadNumber>10</ThreadNumber>
 </easycrawler>
