@@ -28,8 +28,6 @@ public class WebPageAnalyzer {
 				+ String.valueOf(pageSize) + "&siteUrl=" + domain;
 		verifyCode = getVerifyCode();
 		totalPageNum = getTotalPageNum();
-		Logger.write("WebPageAnalyzer.WebPageAnalyzer() - baseUrl: " + baseUrl
-				+ "\n totalPageNum: " + totalPageNum, Logger.ERROR);
 	}
 
 	private boolean hasChildNode() {
@@ -72,19 +70,18 @@ public class WebPageAnalyzer {
 	}
 
 	private int getTotalPageNum() {
+		Logger
+				.write(
+						"WebPageAnalyzer.getTotalPageNum() - Start getting total page number",
+						Logger.DEBUG);
 		String htmlContent = getValidWebpage(1, "id", "button1");
 		setNodeList(htmlContent, "class", "red");
 		int totalPageNum = Integer.valueOf(list.elementAt(0)
 				.toPlainTextString())
 				/ pageSize + 1;
-		// int totalPageNumStart = htmlContent.indexOf("第 1/") + 3;
-		//Logger.write("WebPageAnalyzer.getTotalPageNum() - totalPageNumStart: "
-		// + totalPageNumStart, Logger.DEBUG);
-		// int totalPageNumLength = htmlContent.indexOf("页", totalPageNumStart);
-		// int totalPageNum = Integer.valueOf(htmlContent.substring(
-		// totalPageNumStart, totalPageNumLength));
-		Logger.write("WebPageAnalyzer.getTotalPageNum() - Total Page Num: "
-				+ totalPageNum, Logger.INFO);
+		Logger.write(
+				"WebPageAnalyzer.getTotalPageNum() - Completed getting total page number: "
+						+ totalPageNum, Logger.DEBUG);
 		return totalPageNum;
 
 	}
@@ -93,26 +90,34 @@ public class WebPageAnalyzer {
 			String attributeValue) {
 		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 				+ String.valueOf(pageNum);
+		Logger.write("WebPageAnalyzer.getValidWebpage() - Start fetching URL: "
+				+ Url, Logger.DEBUG);
 		String htmlContent = "";
 		htmlContent = httpHelper.getResponseAsString(Url);
-		// Logger.write("WebPageAnalyzer.getValidWebpage() - Content: " +
-		// htmlContent,
-		// Logger.DEBUG);
 		setNodeList(htmlContent, attributeName, attributeValue);
 		while (hasChildNode()) {
-			// reget verifyCode
+			// get verifyCode again
 			verifyCode = getVerifyCode();
 			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 					+ String.valueOf(pageNum);
 			htmlContent = httpHelper.getResponseAsString(Url);
 			setNodeList(htmlContent, attributeName, attributeValue);
+			Logger
+					.write(
+							"WebPageAnalyzer.getValidWebpage() - VerifyCode is wrong, get it again.",
+							Logger.ERROR);
 		}
-		Logger.write("WebPageAnalyzer.getValidWebpage() - Fetch URL: " + Url,
-				Logger.INFO);
+		Logger.write(
+				"WebPageAnalyzer.getValidWebpage() - Completed fetching URL: "
+						+ Url, Logger.INFO);
 		return htmlContent;
 	}
 
 	public void produceResultFile() {
+		Logger
+				.write(
+						"WebPageAnalyzer.produceResultFile() - Start getting all pages.",
+						Logger.DEBUG);
 		String htmlContent = "";
 		int pageNum = 1;
 		int errorTimes = 0;
@@ -127,13 +132,17 @@ public class WebPageAnalyzer {
 			} else {
 				if (++errorTimes > 5) {
 					Logger.write(
-							"WebPageAnalyzer.produceResultFile() - Failed page number: "
-									+ pageNum, Logger.ERROR);
-					return;
+							"WebPageAnalyzer.produceResultFile() - Failed at page "
+									+ pageNum + "for at least 5 times.",
+							Logger.ERROR);
+					break;
 				}
 			}
 		}
-
+		Logger
+				.write(
+						"WebPageAnalyzer.produceResultFile() - Completed getting all pages.",
+						Logger.DEBUG);
 	}
 
 	private String[] getCellUrl(String htmlContent) {
@@ -154,6 +163,8 @@ public class WebPageAnalyzer {
 	}
 
 	private void produceFile(String[] Url, int pageNum) {
+		Logger.write("WebPageAnalyzer.produceFile() - Start writing page:"
+				+ pageNum, Logger.DEBUG);
 		String htmlContent = "";
 		int errorTimes = 0;
 		ContainerHelper container = new ContainerHelper(pageNum);
@@ -168,15 +179,19 @@ public class WebPageAnalyzer {
 			} else {
 				i--;
 				if (++errorTimes > 5) {
-					container.append("Failed at page: " + pageNum + "\r\n"
-							+ htmlContent);
-					Logger.write("WebPageAnalyzer - File Failed at page: "
-							+ pageNum + "\r\n" + htmlContent, Logger.INFO);
-					container.close();
-					return;
+					container
+							.append("WebPageAnalyzer.produceFile() - Failed at page: "
+									+ pageNum + "\r\n" + htmlContent);
+					Logger.write(
+							"WebPageAnalyzer.produceFile() - Failed at page: "
+									+ pageNum + "\r\n" + htmlContent,
+							Logger.INFO);
+					break;
 				}
 			}
 		}
 		container.close();
+		Logger.write("WebPageAnalyzer.produceFile() - Completed writing page: "
+				+ pageNum, Logger.DEBUG);
 	}
 }

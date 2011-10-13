@@ -41,16 +41,16 @@ public class HttpHelper {
 				}
 				resultStream = entity.getContent();
 			} catch (Exception e) {
-				Logger.write("HttpHelper.getResponseAsStream: " + Url + "\r\n"
+				Logger.write("HttpHelper.getResponseAsStream() - Failed to get response from URL: " + Url + "\r\n"
 						+ e.getMessage(), Logger.ERROR);
 				e.printStackTrace();
 				try {
 					EntityUtils.consume(entity);
 				} catch (Exception e1) {
-					Logger.write("HttpHelper.getResponseAsStream: " + Url
+					Logger.write("HttpHelper.getResponseAsStream() - Failed to consume corrupt response entity."
 							+ "\r\n" + e1.getMessage(), Logger.ERROR);
 					e1.printStackTrace();
-					System.exit(1);
+					Thread.currentThread().interrupt();
 				}
 				response = null;
 				continue;
@@ -74,6 +74,8 @@ public class HttpHelper {
 	}
 
 	public String getResponseAsString(String Url) {
+		Logger.write("HttpHelper.getResponseAsString() - Start getting content of URL: " + Url 
+				, Logger.DEBUG);
 		BufferedReader br;
 		String htmlLine = "";
 		String htmlContent = "";
@@ -103,6 +105,8 @@ public class HttpHelper {
 			}
 		}
 		htmlContent = htmlContent.replaceAll("&nbsp;", "");
+		Logger.write("HttpHelper.getResponseAsString() - Completed getting content of URL: " + Url 
+				, Logger.DEBUG);
 		return htmlContent;
 	}
 }
