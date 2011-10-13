@@ -16,8 +16,9 @@ public class ContainerHelper {
 		resultPath = ConfigHelper.getString("ResultPath");
 		pagePerFile = Integer.valueOf(ConfigHelper.getString("PagePerFile"));
 		this.pageNum = pageNum;
-		//String.valueOf(Integer.valueOf(Thread.currentThread().getName())+1)
-		String fileName =String.valueOf(pageNum / pagePerFile) + ".txt";
+		// String.valueOf(Integer.valueOf(Thread.currentThread().getName())+1)
+		String fileName = Thread.currentThread().getName() + "-"
+				+ String.valueOf(pageNum / pagePerFile + 1) + ".txt";
 		try {
 			fw = new FileWriter(resultPath + fileName, true);
 		} catch (Exception e) {
