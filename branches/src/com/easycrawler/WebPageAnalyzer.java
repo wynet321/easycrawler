@@ -17,12 +17,14 @@ public class WebPageAnalyzer {
 	private String verifyCode;
 	private NodeList list;
 	private HttpHelper httpHelper;
+	private int pagePerFile;
 	private int threadNum;
 
 	public WebPageAnalyzer() {
 		domain = ConfigHelper.getString("Domain");
 		host = ConfigHelper.getString("Host");
 		threadNum = ConfigHelper.getInt("ThreadNumber");
+		pagePerFile = ConfigHelper.getInt("PagePerFile");
 		httpHelper = new HttpHelper();
 		pageSize = Integer.valueOf(ConfigHelper.getString("PageSize"));
 		baseUrl = host
@@ -126,14 +128,18 @@ public class WebPageAnalyzer {
 						Logger.DEBUG);
 		String htmlContent = "";
 		// int pageNum = 1;
-		int pageNumPerThread = totalPageNum / threadNum;
-		totalPageNum = (Integer.valueOf(Thread.currentThread().getName()))
+		int pageNumPerThread = (1 + totalPageNum / (threadNum * pagePerFile))
+				* pagePerFile;
+		int threadTotalPageNum = Integer.valueOf(Thread.currentThread()
+				.getName())
 				* pageNumPerThread;
+		if (threadTotalPageNum > totalPageNum)
+			threadTotalPageNum = totalPageNum;
 		int pageNum = (Integer.valueOf(Thread.currentThread().getName()) - 1)
 				* pageNumPerThread + 1;
 		int errorTimes = 0;
 		String[] cellUrl = new String[pageSize];
-		while (pageNum <= totalPageNum) {
+		while (pageNum <= threadTotalPageNum) {
 			htmlContent = getValidWebpage(pageNum, "id", "button1");
 			cellUrl = getCellUrl(htmlContent);
 			if (cellUrl[0] != "Fail") {

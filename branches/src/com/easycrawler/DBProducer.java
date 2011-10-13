@@ -9,11 +9,11 @@ public class DBProducer {
 	}
 
 	private static void startThread() {
-		int threadNum = 10;
+		int threadNum = ConfigHelper.getInt("ThreadNumber");
 		Thread[] sonThreads = new Thread[threadNum];
-		for (int i = 1; i < threadNum; ++i) {
-			sonThreads[i] = new SonThread(String.valueOf(i));
-			sonThreads[i].start();
+		for (int i = 1; i <= threadNum; ++i) {
+			sonThreads[i-1] = new SonThread(String.valueOf(i));
+			sonThreads[i-1].start();
 			try {
 				long randomTime = (new Random().nextInt(10) + 20) * 1000;
 				Logger.write("SonThread.startThread() - Sleeping: "
