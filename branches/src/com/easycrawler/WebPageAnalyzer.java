@@ -74,8 +74,11 @@ public class WebPageAnalyzer {
 				.write(
 						"WebPageAnalyzer.getTotalPageNum() - Start getting total page number",
 						Logger.DEBUG);
-		String htmlContent = getValidWebpage(1, "id", "button1");
-		setNodeList(htmlContent, "class", "red");
+		String htmlContent = "";
+		do {
+			htmlContent = getValidWebpage(1, "id", "button1");
+			setNodeList(htmlContent, "class", "red");
+		} while (!hasChildNode());
 		int totalPageNum = Integer.valueOf(list.elementAt(0)
 				.toPlainTextString())
 				/ pageSize + 1;
@@ -90,8 +93,8 @@ public class WebPageAnalyzer {
 			String attributeValue) {
 		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
 				+ String.valueOf(pageNum);
-		Logger.write("WebPageAnalyzer.getValidWebpage() - Start fetching URL: "
-				+ Url, Logger.DEBUG);
+		Logger.write("WebPageAnalyzer.getValidWebpage() - Start fetching page: "
+				+ pageNum, Logger.DEBUG);
 		String htmlContent = "";
 		htmlContent = httpHelper.getResponseAsString(Url);
 		setNodeList(htmlContent, attributeName, attributeValue);
@@ -108,8 +111,8 @@ public class WebPageAnalyzer {
 							Logger.ERROR);
 		}
 		Logger.write(
-				"WebPageAnalyzer.getValidWebpage() - Completed fetching URL: "
-						+ Url, Logger.INFO);
+				"WebPageAnalyzer.getValidWebpage() - Completed fetching page: "
+						+ pageNum, Logger.INFO);
 		return htmlContent;
 	}
 
