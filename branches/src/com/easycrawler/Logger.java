@@ -8,7 +8,8 @@ public class Logger {
 	private static int logLevel;
 	private static FileWriter fw;
 	private static String resultPath;
-	private static int logFileNum;
+	private static int currentLogFileNum;
+	private static int totalLogFileNum;
 	public final static int ERROR = 0;
 	public final static int INFO = 1;
 	public final static int DEBUG = 2;
@@ -17,30 +18,34 @@ public class Logger {
 		if (fw == null) {
 			resultPath = ConfigHelper.getString("ResultPath");
 			logLevel = Integer.valueOf(ConfigHelper.getString("LogLevel"));
-			logFileNum = 0;
+			totalLogFileNum = Integer.valueOf(ConfigHelper
+					.getString("LogFileNumber")) - 1;
+			currentLogFileNum = 0;
 			try {
 				fw = new FileWriter(resultPath + "log"
-						+ String.valueOf(logFileNum) + ".txt", true);
+						+ String.valueOf(currentLogFileNum) + ".txt", true);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
-			if (new File(resultPath + "log" + String.valueOf(logFileNum)
+			if (new File(resultPath + "log" + String.valueOf(currentLogFileNum)
 					+ ".txt").length() > 3000000) {
-				if (logFileNum++ > 8)
-					logFileNum = 0;
-				if (new File(resultPath + "log" + String.valueOf(logFileNum)
-						+ ".txt").exists()) {
+				if (++currentLogFileNum > totalLogFileNum)
+					currentLogFileNum = 0;
+				if (new File(resultPath + "log"
+						+ String.valueOf(currentLogFileNum) + ".txt").exists()) {
 					try {
 						fw = new FileWriter(resultPath + "log"
-								+ String.valueOf(logFileNum) + ".txt", false);
+								+ String.valueOf(currentLogFileNum) + ".txt",
+								false);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				} else {
 					try {
 						fw = new FileWriter(resultPath + "log"
-								+ String.valueOf(logFileNum) + ".txt", true);
+								+ String.valueOf(currentLogFileNum) + ".txt",
+								true);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -50,15 +55,15 @@ public class Logger {
 		return fw;
 	}
 
-	public static void write(String Content, int logCategory) {
-		FileWriter temp = getLogger();
+	public synchronized static void write(String Content, int logCategory) {
+		FileWriter logfw = getLogger();
 		String logResult = getCurrentTime() + " - Thread"
 				+ Thread.currentThread().getName() + " " + Content + "\r\n";
 		if (logCategory <= logLevel)
 			try {
 				System.out.println(logResult);
-				temp.append(logResult);
-				temp.flush();
+				logfw.append(logResult);
+				logfw.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

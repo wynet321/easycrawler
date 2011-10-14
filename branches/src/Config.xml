@@ -8,4 +8,5 @@
 	<Host>http://www.miibeian.gov.cn/</Host>
 	<PageSize>100</PageSize>
 	<ThreadNumber>10</ThreadNumber>
+	<LogFileNumber>30</LogFileNumber>
 </easycrawler>

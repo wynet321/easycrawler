@@ -29,6 +29,9 @@ public class ContainerHelper {
 	}
 
 	public void append(String content) {
+		Logger.write(
+				"ContainerHelper.append - Start appending content, pageNum:"
+						+ pageNum, Logger.INFO);
 		try {
 			fw.append(content);
 			fw.flush();
@@ -38,9 +41,13 @@ public class ContainerHelper {
 					Logger.ERROR);
 			e.printStackTrace();
 		}
+		Logger.write("ContainerHelper.append - Completed appending content: "
+				+ content, Logger.INFO);
 	}
 
 	public void append(String id, NodeList list) {
+		Logger.write("ContainerHelper.append - Start appending unit id: " + id,
+				Logger.INFO);
 		try {
 			fw.append(getRegisterInfo(id, list));
 			fw.flush();
@@ -50,6 +57,8 @@ public class ContainerHelper {
 					Logger.ERROR);
 			e.printStackTrace();
 		}
+		Logger.write("ContainerHelper.append - Start appending unit id: " + id,
+				Logger.INFO);
 	}
 
 	// private static Hashtable<String, String> getRegisterInfo(String content)

@@ -127,7 +127,6 @@ public class WebPageAnalyzer {
 						"WebPageAnalyzer.produceResultFile() - Start getting all pages.",
 						Logger.DEBUG);
 		String htmlContent = "";
-		// int pageNum = 1;
 		int pageNumPerThread = (1 + totalPageNum / (threadNum * pagePerFile))
 				* pagePerFile;
 		int threadTotalPageNum = Integer.valueOf(Thread.currentThread()

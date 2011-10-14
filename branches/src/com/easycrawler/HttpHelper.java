@@ -92,7 +92,7 @@ public class HttpHelper {
 	public String getResponseAsString(String Url) {
 		Logger.write(
 				"HttpHelper.getResponseAsString() - Start getting content of URL: "
-						+ Url, Logger.DEBUG);
+						+ Url.substring(Url.lastIndexOf("/")), Logger.DEBUG);
 		BufferedReader br;
 		String htmlLine = "";
 		String htmlContent = "";
@@ -139,7 +139,7 @@ public class HttpHelper {
 		htmlContent = htmlContent.replaceAll("&nbsp;", "");
 		Logger.write(
 				"HttpHelper.getResponseAsString() - Completed getting content of URL: "
-						+ Url, Logger.DEBUG);
+						+ Url.substring(Url.lastIndexOf("/")), Logger.DEBUG);
 		return htmlContent;
 	}
 }
