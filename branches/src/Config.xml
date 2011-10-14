@@ -7,6 +7,6 @@
 	<PagePerFile>100</PagePerFile>
 	<Host>http://www.miibeian.gov.cn/</Host>
 	<PageSize>100</PageSize>
-	<ThreadNumber>10</ThreadNumber>
+	<ThreadNumber>15</ThreadNumber>
 	<LogFileNumber>30</LogFileNumber>
 </easycrawler>
