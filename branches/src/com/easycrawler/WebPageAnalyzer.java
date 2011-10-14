@@ -95,8 +95,8 @@ public class WebPageAnalyzer {
 
 	private String getValidWebpage(int pageNum, String attributeName,
 			String attributeValue) {
-		String Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
-				+ String.valueOf(pageNum);
+		String Url = baseUrl + "&pageNo=" + String.valueOf(pageNum)
+				+ "&verifyCode=" + verifyCode;
 		Logger.write(
 				"WebPageAnalyzer.getValidWebpage() - Start fetching page: "
 						+ pageNum, Logger.DEBUG);
@@ -106,8 +106,8 @@ public class WebPageAnalyzer {
 		while (hasChildNode()) {
 			// get verifyCode again
 			verifyCode = getVerifyCode();
-			Url = baseUrl + "&verifyCode=" + verifyCode + "&pageNo="
-					+ String.valueOf(pageNum);
+			Url = baseUrl + "&pageNo=" + String.valueOf(pageNum)
+					+ "&verifyCode=" + verifyCode;
 			htmlContent = httpHelper.getResponseAsString(Url);
 			setNodeList(htmlContent, attributeName, attributeValue);
 			Logger
