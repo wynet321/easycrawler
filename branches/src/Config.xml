@@ -1,7 +1,7 @@
 <easycrawler>
 	<LogLevel>2</LogLevel>
 	<ResultPath>d:/easycrawlerresult/</ResultPath>
-	<Domain>.com</Domain>
+	<Domain>.net</Domain>
 	<Charset>GBK</Charset>
 	<HttpTimeOut>300000</HttpTimeOut>
 	<PagePerFile>100</PagePerFile>

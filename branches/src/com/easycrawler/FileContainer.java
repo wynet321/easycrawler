@@ -6,13 +6,13 @@ import java.util.Date;
 
 import org.htmlparser.util.NodeList;
 
-public class ContainerHelper {
+public class FileContainer implements IContainer{
 	private String resultPath;
 	private int pagePerFile;
 	private int pageNum;
 	private FileWriter fw;
 
-	public ContainerHelper(int pageNum) {
+	public FileContainer(int pageNum) {
 		resultPath = ConfigHelper.getString("ResultPath");
 		pagePerFile = Integer.valueOf(ConfigHelper.getString("PagePerFile"));
 		this.pageNum = pageNum;
@@ -121,8 +121,8 @@ public class ContainerHelper {
 		String webAddress = "";
 		int listLength = webAddressList.size();
 		for (int i = 0; i < listLength; i++) {
-			webAddress += webAddressList.elementAt(i).toHtml().replaceAll(
-					"<[^>]+>", "")
+			webAddress += webAddressList.elementAt(i).toHtml()
+					.replaceAll("<[^>]+>", "")
 					+ ";";
 		}
 		registerInfo += webAddress + "    ";

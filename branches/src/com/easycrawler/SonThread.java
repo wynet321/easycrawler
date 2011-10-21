@@ -9,7 +9,7 @@ public class SonThread extends Thread {
 	public void run() {
 		Logger.write(" Started.", Logger.INFO);
 		// work
-		new WebPageAnalyzer().produceResultFile();
+		new MiibeianWebCrawler().crawl();
 		Logger.write(" Completed.", Logger.INFO);
 	}
 }
