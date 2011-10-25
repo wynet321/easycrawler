@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.htmlparser.util.NodeList;
 
-public class FileContainer implements IContainer{
+public class FileContainer extends Container{
 	private String resultPath;
 	private int pagePerFile;
 	private int pageNum;
@@ -60,41 +60,6 @@ public class FileContainer implements IContainer{
 		Logger.write("ContainerHelper.append - Start appending unit id: " + id,
 				Logger.INFO);
 	}
-
-	// private static Hashtable<String, String> getRegisterInfo(String content)
-	// {
-	// Document doc = DOMHelper.getDoc(content);
-	// Hashtable<String, String> registerInfo = new Hashtable();
-	// registerInfo.put("licenseNo", doc.getChildNodes().item(0)
-	// .getFirstChild().getFirstChild().getChildNodes().item(1)
-	// .getNodeValue());
-	// registerInfo.put("passDate", doc.getChildNodes().item(0)
-	// .getFirstChild().getFirstChild().getChildNodes().item(3)
-	// .getNodeValue());
-	// registerInfo.put("unitName", doc.getChildNodes().item(0)
-	// .getFirstChild().getChildNodes().item(1).getChildNodes()
-	// .item(1).getNodeValue());
-	// registerInfo.put("Category", doc.getChildNodes().item(0)
-	// .getFirstChild().getChildNodes().item(1).getChildNodes()
-	// .item(3).getNodeValue());
-	// registerInfo.put("name", doc.getChildNodes().item(1).getFirstChild()
-	// .getFirstChild().getChildNodes().item(1).getNodeValue());
-	// NodeList webAddressList = doc.getChildNodes().item(1).getFirstChild()
-	// .getFirstChild().getChildNodes().item(3).getChildNodes();
-	// String webAddress = "";
-	// for (int i = 0; i < webAddressList.getLength(); i++) {
-	// webAddress += webAddressList.item(i).getTextContent().replaceAll(
-	// "<[^>]+>", "")
-	// + ";";
-	// }
-	// registerInfo.put("webAddress", webAddress);
-	// registerInfo.put("contactor", doc.getChildNodes().item(1)
-	// .getFirstChild().getChildNodes().item(1).getChildNodes()
-	// .item(1).getNodeValue());
-	//
-	// return registerInfo;
-	//
-	// }
 
 	@SuppressWarnings("deprecation")
 	private static String getRegisterInfo(String id, NodeList list) {
