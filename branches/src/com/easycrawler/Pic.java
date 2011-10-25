@@ -86,16 +86,15 @@ public class Pic {
 		return "0";
 	}
 
-	public String getResult(String url) {
-		HttpHelper httpHelper=new HttpHelper();
+	public String getResult(String url, HttpHelper httpHelper) {
 		return getResult(httpHelper.getResponseAsStream(url));
 	}
 
-	public String getResult() {
-		String url="http://www.miibeian.gov.cn/validateCode";
-		HttpHelper httpHelper=new HttpHelper();
+	public String getResult(HttpHelper httpHelper) {
+		String url = "http://www.miibeian.gov.cn/validateCode";
 		return getResult(httpHelper.getResponseAsStream(url));
 	}
+
 	public int getResult(URL fileName) {
 		Image img = null;
 		// get original image

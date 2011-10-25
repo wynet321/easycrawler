@@ -5,34 +5,32 @@ import org.htmlparser.util.NodeList;
 public class MiibeianWebCrawler {
 	private static String domain;
 	private int totalPageNum;
-	MiibeianWebPage miibeianWebPage;
-	private HttpHelper httpHelper;
+	ListPage listPage;
 	private int threadNum;
 
 	public MiibeianWebCrawler() {
 		domain = ConfigHelper.getString("Domain");
 		threadNum = ConfigHelper.getInt("ThreadNumber");
+		listPage = new ListPage(domain);
 		totalPageNum = getTotalPageNum();
-		miibeianWebPage = new MiibeianWebPage(domain);
 	}
 
 	private int getTotalPageNum() {
 		Logger.write(
-				"WebPageAnalyzer.getTotalPageNum() - Start getting total page number",
+				"MiibeianWebCrawler.getTotalPageNum() - Start getting total page number",
 				Logger.DEBUG);
-		NodeList list = miibeianWebPage.getNodeListByPageNumWithAttribute(1,
-				"class", "red");
+		NodeList list = listPage.getNodeListByPageNumWithAttribute(1, "class",
+				"red");
 		totalPageNum = Integer.valueOf(list.elementAt(0).toPlainTextString())
-				/ miibeianWebPage.getPageSize() + 1;
+				/ listPage.getPageSize() + 1;
 		Logger.write(
-				"WebPageAnalyzer.getTotalPageNum() - Completed getting total page number: "
+				"MiibeianWebCrawler.getTotalPageNum() - Completed getting total page number: "
 						+ totalPageNum, Logger.DEBUG);
 		return totalPageNum;
 	}
 
 	public void crawl() {
-		Logger.write(
-				"WebPageAnalyzer.produceResultFile() - Start getting all pages.",
+		Logger.write("MiibeianWebCrawler.crawl() - Start getting all pages.",
 				Logger.DEBUG);
 		String htmlContent = "";
 		int currentThreadName = Integer.valueOf(Thread.currentThread()
@@ -43,61 +41,59 @@ public class MiibeianWebCrawler {
 			threadTotalPageNum = totalPageNum;
 		int pageNum = (currentThreadName - 1) * pageNumPerThread + 1;
 		int errorTimes = 0;
-		String[] cellUrl = new String[miibeianWebPage.getPageSize()];
+		String[] cellUrl = new String[listPage.getPageSize()];
 		while (pageNum <= threadTotalPageNum) {
-			htmlContent = miibeianWebPage.getValidWebpageWithoutAttribute(
-					pageNum, "id", "button1");
-			cellUrl = miibeianWebPage.getURLFromPage(htmlContent);
+			htmlContent = listPage.getValidWebpageWithoutAttribute(pageNum,
+					"id", "button1");
+			cellUrl = listPage.getURLFromPage(htmlContent);
+			Logger.write("cellUrl:" + cellUrl[0], Logger.ERROR);
 			if (cellUrl[0] != "Fail") {
 				errorTimes = 0;
 				writeToContainer(cellUrl, pageNum);
 				pageNum++;
 			} else {
 				if (++errorTimes > 5) {
-					Logger.write(
-							"WebPageAnalyzer.produceResultFile() - Failed at page "
-									+ pageNum + "for at least 5 times.",
-							Logger.ERROR);
+					Logger.write("MiibeianWebCrawler.crawl() - Failed at page "
+							+ pageNum + "for at least 5 times.", Logger.ERROR);
 					break;
 				}
 			}
 		}
 		Logger.write(
-				"WebPageAnalyzer.produceResultFile() - Completed getting all pages.",
+				"MiibeianWebCrawler.crawl() - Completed getting all pages.",
 				Logger.DEBUG);
 	}
 
 	private void writeToContainer(String[] Url, int pageNum) {
-		Logger.write("WebPageAnalyzer.produceFile() - Start writing page:"
-				+ pageNum, Logger.DEBUG);
-		String htmlContent = "";
+		Logger.write(
+				"MiibeianWebCrawler.writeToContainer() - Start writing page:"
+						+ pageNum, Logger.DEBUG);
 		int errorTimes = 0;
+		DetailPage detailPage = new DetailPage();
 		FileContainer container = new FileContainer(pageNum);
-		for (int i = 0; i < Url.length; i++) {
-			htmlContent = httpHelper.getResponseAsString(Url[i]);
-			NodeList list = miibeianWebPage.transferToNodeList(htmlContent,
+		for (int i = 0; i < Url.length; ++i) {
+			NodeList list = detailPage.getNodeListWithAttribute(Url[i],
 					"class", "a");
 			if (list.size() == 2) {
 				errorTimes = 0;
-				// Append id into db
 				container.append(Url[i].substring(Url[i].indexOf("id=") + 3),
 						list);
 			} else {
 				i--;
 				if (++errorTimes > 5) {
 					container
-							.append("WebPageAnalyzer.produceFile() - Failed at page: "
-									+ pageNum + "\r\n" + htmlContent);
+							.append("MiibeianWebCrawler.writeToContainer() - Failed at page: "
+									+ pageNum + "\r\n" + Url[i]);
 					Logger.write(
-							"WebPageAnalyzer.produceFile() - Failed at page: "
-									+ pageNum + "\r\n" + htmlContent,
-							Logger.INFO);
+							"MiibeianWebCrawler.writeToContainer() - Failed at page: "
+									+ pageNum + "\r\n" + Url[i], Logger.INFO);
 					break;
 				}
 			}
 		}
 		container.close();
-		Logger.write("WebPageAnalyzer.produceFile() - Completed writing page: "
-				+ pageNum, Logger.DEBUG);
+		Logger.write(
+				"MiibeianWebCrawler.writeToContainer() - Completed writing page: "
+						+ pageNum, Logger.DEBUG);
 	}
 }
