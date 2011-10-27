@@ -1,0 +1,8 @@
+<easycrawler>
+	<LogLevel>2</LogLevel>
+	<ResultPath>d:/easycrawlerresult/</ResultPath>
+	<Domain>com</Domain>
+	<Charset>GBK</Charset>
+	<HttpTimeOut>300000</HttpTimeOut><PagePerFile>10</PagePerFile><Host>http://www.miibeian.gov.cn/</Host>
+	<PageSize>1000</PageSize>
+</easycrawler>
