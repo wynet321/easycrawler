@@ -6,7 +6,7 @@ import org.htmlparser.filters.HasAttributeFilter;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
-public class Crawler {
+public class TempCrawler {
 
 	public static void main(String[] args) {
 		// String url = "http://www.audi.cn/";
