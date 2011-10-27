@@ -3,27 +3,30 @@ package com.easycrawler;
 import org.htmlparser.Tag;
 import org.htmlparser.util.NodeList;
 
-public class ListPage extends WebPage {
+import com.easycrawler.helper.ConfigXMLHelper;
+import com.easycrawler.helper.LogHelper;
+
+public class ListWebPage extends WebPageBase {
 
 	private String baseUrl;
-	private HttpHelper httpHelper;
+	private HttpHandler httpHelper;
 	private String host;
 	private static int pageSize;
 	private String verifyCode;
-	private VerifyCodePage verifyCodePage;
+	private VerifyCodeWebPage verifyCodePage;
 
 	public int getPageSize() {
 		return pageSize;
 	}
 
-	public ListPage(String domain) {
-		host = ConfigHelper.getString("Host");
-		pageSize = Integer.valueOf(ConfigHelper.getString("PageSize"));
+	public ListWebPage(String domain) {
+		host = ConfigXMLHelper.getString("Host");
+		pageSize = Integer.valueOf(ConfigXMLHelper.getString("PageSize"));
 		baseUrl = host
 				+ "icp/publish/query/icpMemoInfo_searchExecute.action?page.pageSize="
 				+ String.valueOf(pageSize) + "&siteUrl=" + domain;
-		httpHelper = new HttpHelper();
-		verifyCodePage = new VerifyCodePage();
+		httpHelper = new HttpHandler();
+		verifyCodePage = new VerifyCodeWebPage();
 		verifyCode = verifyCodePage.getVerifyCode(httpHelper);
 	}
 
@@ -40,22 +43,22 @@ public class ListPage extends WebPage {
 			String attributeName, String attributeValue) {
 		String Url = baseUrl + "&pageNo=" + String.valueOf(pageNum)
 				+ "&verifyCode=" + verifyCode;
-		Logger.write(
+		LogHelper.write(
 				"ListPage.getValidWebpageWithAttribute() - Start fetching page: "
-						+ pageNum, Logger.DEBUG);
+						+ pageNum, LogHelper.DEBUG);
 		String htmlContent = httpHelper.getResponseAsString(Url);
 		while (!hasAttribute(htmlContent, attributeName, attributeValue)) {
-			Logger.write(
+			LogHelper.write(
 					"ListPage.getValidWebpageWithAttribute() - VerifyCode is wrong, get it again.",
-					Logger.ERROR);
-			Logger.write(htmlContent, Logger.ERROR);
+					LogHelper.ERROR);
+			LogHelper.write(htmlContent, LogHelper.ERROR);
 			verifyCode = verifyCodePage.getVerifyCode(httpHelper);
 			Url = baseUrl + "&pageNo=" + String.valueOf(pageNum)
 					+ "&verifyCode=" + verifyCode;
 			htmlContent = httpHelper.getResponseAsString(Url);
 		}
-		Logger.write("ListPage.getValidWebpage() - Completed fetching page: "
-				+ pageNum, Logger.INFO);
+		LogHelper.write("ListPage.getValidWebpage() - Completed fetching page: "
+				+ pageNum, LogHelper.INFO);
 		return htmlContent;
 	}
 
@@ -63,22 +66,22 @@ public class ListPage extends WebPage {
 			String attributeName, String attributeValue) {
 		String Url = baseUrl + "&pageNo=" + String.valueOf(pageNum)
 				+ "&verifyCode=" + verifyCode;
-		Logger.write(
+		LogHelper.write(
 				"ListPage.getValidWebpageWithoutAttribute() - Start fetching page: "
-						+ pageNum, Logger.DEBUG);
+						+ pageNum, LogHelper.DEBUG);
 		String htmlContent = httpHelper.getResponseAsString(Url);
 		while (hasAttribute(htmlContent, attributeName, attributeValue)) {
-			Logger.write(
+			LogHelper.write(
 					"ListPage.getValidWebpageWithoutAttribute() - VerifyCode is wrong, get it again.",
-					Logger.ERROR);
+					LogHelper.ERROR);
 			verifyCode = verifyCodePage.getVerifyCode(httpHelper);
 			Url = baseUrl + "&pageNo=" + String.valueOf(pageNum)
 					+ "&verifyCode=" + verifyCode;
 			htmlContent = httpHelper.getResponseAsString(Url);
 		}
-		Logger.write(
+		LogHelper.write(
 				"ListPage.getValidWebpageWithoutAttribute() - Completed fetching page: "
-						+ pageNum, Logger.INFO);
+						+ pageNum, LogHelper.INFO);
 		return htmlContent;
 	}
 

@@ -1,10 +1,10 @@
-package com.easycrawler;
+package com.easycrawler.helper;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Calendar;
 
-public class Logger {
+public class LogHelper {
 	private static int logLevel;
 	private static FileWriter fw;
 	private static String resultPath;
@@ -16,9 +16,9 @@ public class Logger {
 
 	private static FileWriter getLogger() {
 		if (fw == null) {
-			resultPath = ConfigHelper.getString("ResultPath");
-			logLevel = Integer.valueOf(ConfigHelper.getString("LogLevel"));
-			totalLogFileNum = Integer.valueOf(ConfigHelper
+			resultPath = ConfigXMLHelper.getString("ResultPath");
+			logLevel = Integer.valueOf(ConfigXMLHelper.getString("LogLevel"));
+			totalLogFileNum = Integer.valueOf(ConfigXMLHelper
 					.getString("LogFileNumber")) - 1;
 			currentLogFileNum = 0;
 			try {

@@ -5,8 +5,10 @@ import org.htmlparser.filters.HasAttributeFilter;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
-public class WebPage {
-	
+import com.easycrawler.helper.LogHelper;
+
+public class WebPageBase {
+
 	protected NodeList transferToNodeList(String htmlContent,
 			String attributeName, String attributeValue) {
 		NodeList list = new NodeList();
@@ -17,8 +19,9 @@ public class WebPage {
 			parser = new Parser(htmlContent);
 			list = parser.extractAllNodesThatMatch(haf);
 		} catch (ParserException e) {
-			Logger.write("ListPage.transferToNodeList() - " + e.getMessage(),
-					Logger.ERROR);
+			LogHelper.write(
+					"ListPage.transferToNodeList() - " + e.getMessage(),
+					LogHelper.ERROR);
 			e.printStackTrace();
 		}
 		return list;
@@ -34,8 +37,8 @@ public class WebPage {
 			parser = new Parser(htmlContent);
 			list = parser.extractAllNodesThatMatch(haf);
 		} catch (ParserException e) {
-			Logger.write("ListPage.hasAttribute() - " + e.getMessage(),
-					Logger.ERROR);
+			LogHelper.write("ListPage.hasAttribute() - " + e.getMessage(),
+					LogHelper.ERROR);
 			e.printStackTrace();
 		}
 		return (list.size() > 0) ? true : false;

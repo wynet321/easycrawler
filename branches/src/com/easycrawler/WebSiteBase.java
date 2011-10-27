@@ -1,5 +1,5 @@
 package com.easycrawler;
 
-public class Container {
+public class WebSiteBase {
 
 }

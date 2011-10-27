@@ -6,15 +6,18 @@ import java.util.Date;
 
 import org.htmlparser.util.NodeList;
 
-public class FileContainer extends Container{
+import com.easycrawler.helper.ConfigXMLHelper;
+import com.easycrawler.helper.LogHelper;
+
+public class FileContainer extends ContainerBase {
 	private String resultPath;
 	private int pagePerFile;
 	private int pageNum;
 	private FileWriter fw;
 
 	public FileContainer(int pageNum) {
-		resultPath = ConfigHelper.getString("ResultPath");
-		pagePerFile = Integer.valueOf(ConfigHelper.getString("PagePerFile"));
+		resultPath = ConfigXMLHelper.getString("ResultPath");
+		pagePerFile = Integer.valueOf(ConfigXMLHelper.getString("PagePerFile"));
 		this.pageNum = pageNum;
 		// String.valueOf(Integer.valueOf(Thread.currentThread().getName())+1)
 		String fileName = Thread.currentThread().getName() + "-"
@@ -22,43 +25,45 @@ public class FileContainer extends Container{
 		try {
 			fw = new FileWriter(resultPath + fileName, true);
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.getFileWriter: " + e.getMessage(),
-					Logger.ERROR);
+			LogHelper.write("ContainerHelper.getFileWriter: " + e.getMessage(),
+					LogHelper.ERROR);
 			e.printStackTrace();
 		}
 	}
 
 	public void append(String content) {
-		Logger.write(
+		LogHelper.write(
 				"ContainerHelper.append - Start appending content, pageNum:"
-						+ pageNum, Logger.INFO);
+						+ pageNum, LogHelper.INFO);
 		try {
 			fw.append(content);
 			fw.flush();
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.append - content: " + content
+			LogHelper.write("ContainerHelper.append - content: " + content
 					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
-					Logger.ERROR);
+					LogHelper.ERROR);
 			e.printStackTrace();
 		}
-		Logger.write("ContainerHelper.append - Completed appending content: "
-				+ content, Logger.INFO);
+		LogHelper.write(
+				"ContainerHelper.append - Completed appending content: "
+						+ content, LogHelper.INFO);
 	}
 
 	public void append(String id, NodeList list) {
-		Logger.write("ContainerHelper.append - Start appending unit id: " + id,
-				Logger.INFO);
+		LogHelper.write("ContainerHelper.append - Start appending unit id: "
+				+ id, LogHelper.INFO);
 		try {
 			fw.append(getRegisterInfo(id, list));
 			fw.flush();
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.append - list.Length: " + list.size()
-					+ "\r\npageNum: " + pageNum + "\r\n" + e.getMessage(),
-					Logger.ERROR);
+			LogHelper.write(
+					"ContainerHelper.append - list.Length: " + list.size()
+							+ "\r\npageNum: " + pageNum + "\r\n"
+							+ e.getMessage(), LogHelper.ERROR);
 			e.printStackTrace();
 		}
-		Logger.write("ContainerHelper.append - Start appending unit id: " + id,
-				Logger.INFO);
+		LogHelper.write("ContainerHelper.append - Start appending unit id: "
+				+ id, LogHelper.INFO);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -106,8 +111,8 @@ public class FileContainer extends Container{
 		try {
 			fw.close();
 		} catch (Exception e) {
-			Logger.write("ContainerHelper.close\r\n" + e.getMessage(),
-					Logger.ERROR);
+			LogHelper.write("ContainerHelper.close\r\n" + e.getMessage(),
+					LogHelper.ERROR);
 			e.printStackTrace();
 		}
 	}

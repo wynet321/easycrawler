@@ -14,14 +14,17 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 
-public class HttpHelper {
+import com.easycrawler.helper.ConfigXMLHelper;
+import com.easycrawler.helper.LogHelper;
+
+public class HttpHandler {
 	private DefaultHttpClient httpClient;
 	private String Charset;
 	private int TimeOut;
 
-	public HttpHelper() {
-		Charset = ConfigHelper.getString("Charset");
-		TimeOut = Integer.valueOf(ConfigHelper.getString("HttpTimeOut"));
+	public HttpHandler() {
+		Charset = ConfigXMLHelper.getString("Charset");
+		TimeOut = Integer.valueOf(ConfigXMLHelper.getString("HttpTimeOut"));
 		HttpParams params = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(params, TimeOut);
 		HttpConnectionParams.setSoTimeout(params, TimeOut);
@@ -43,30 +46,31 @@ public class HttpHelper {
 				}
 				resultStream = entity.getContent();
 			} catch (Exception e) {
-				Logger.write(
+				LogHelper.write(
 						"HttpHelper.getResponseAsStream() - Failed to get response from URL: "
-								+ Url + "\r\n" + e.getMessage(), Logger.ERROR);
+								+ Url + "\r\n" + e.getMessage(),
+						LogHelper.ERROR);
 				e.printStackTrace();
 				try {
 					EntityUtils.consume(entity);
 				} catch (Exception e1) {
-					Logger.write(
-							"HttpHelper.getResponseAsStream() - Failed to consume corrupt response entity."
-									+ "\r\n" + e1.getMessage(), Logger.ERROR);
+					LogHelper
+							.write("HttpHelper.getResponseAsStream() - Failed to consume corrupt response entity."
+									+ "\r\n" + e1.getMessage(), LogHelper.ERROR);
 					e1.printStackTrace();
 					Thread.currentThread().interrupt();
 				}
 				response = null;
 				try {
 					long randomTime = new Random().nextInt(20) * 1000;
-					Logger.write(
+					LogHelper.write(
 							"HttpHelper.getResponseAsString() - Sleeping: "
-									+ randomTime, Logger.INFO);
+									+ randomTime, LogHelper.INFO);
 					Thread.sleep(randomTime);
 				} catch (Exception e2) {
-					Logger.write(
-							"HttpHelper.getResponseAsStream() - Failed to sleep current thread."
-									+ "\r\n" + e2.getMessage(), Logger.ERROR);
+					LogHelper
+							.write("HttpHelper.getResponseAsStream() - Failed to sleep current thread."
+									+ "\r\n" + e2.getMessage(), LogHelper.ERROR);
 					e2.printStackTrace();
 				}
 				continue;
@@ -81,8 +85,9 @@ public class HttpHelper {
 		try {
 			isr = new InputStreamReader(is, Charset);
 		} catch (Exception e) {
-			Logger.write("HttpHelper.getBufferedReaderFromStream"
-					+ e.getMessage(), Logger.ERROR);
+			LogHelper.write(
+					"HttpHelper.getBufferedReaderFromStream" + e.getMessage(),
+					LogHelper.ERROR);
 			e.printStackTrace();
 		}
 		BufferedReader br = new BufferedReader(isr, 8192);
@@ -90,9 +95,9 @@ public class HttpHelper {
 	}
 
 	public String getResponseAsString(String Url) {
-		Logger.write(
+		LogHelper.write(
 				"HttpHelper.getResponseAsString() - Start getting content of URL: "
-						+ Url.substring(Url.lastIndexOf("/")), Logger.DEBUG);
+						+ Url.substring(Url.lastIndexOf("/")), LogHelper.DEBUG);
 		BufferedReader br;
 		String htmlLine = "";
 		String htmlContent = "";
@@ -105,41 +110,40 @@ public class HttpHelper {
 				}
 				br.close();
 			} catch (Exception e) {
-				Logger
-						.write(
-								"HttpHelper.getResponseAsString() - Failed to get the content string from URL: "
-										+ Url + "\r\n" + e.getMessage(),
-								Logger.ERROR);
+				LogHelper
+						.write("HttpHelper.getResponseAsString() - Failed to get the content string from URL: "
+								+ Url + "\r\n" + e.getMessage(),
+								LogHelper.ERROR);
 				e.printStackTrace();
 				try {
 					br.close();
 				} catch (Exception e1) {
-					Logger.write(
+					LogHelper.write(
 							"HttpHelper.getResponseAsString() - Failed to close buffer reader.\r\n"
-									+ e1.getMessage(), Logger.ERROR);
+									+ e1.getMessage(), LogHelper.ERROR);
 					e.printStackTrace();
 					break;
 				}
 				htmlContent = "";
 				try {
 					long randomTime = new Random().nextInt(20) * 1000;
-					Logger.write(
+					LogHelper.write(
 							"HttpHelper.getResponseAsString() - Sleeping: "
-									+ randomTime, Logger.INFO);
+									+ randomTime, LogHelper.INFO);
 					Thread.sleep(randomTime);
 				} catch (Exception e2) {
-					Logger.write(
-							"HttpHelper.getResponseAsString() - Failed to sleep current thread."
-									+ "\r\n" + e2.getMessage(), Logger.ERROR);
+					LogHelper
+							.write("HttpHelper.getResponseAsString() - Failed to sleep current thread."
+									+ "\r\n" + e2.getMessage(), LogHelper.ERROR);
 					e2.printStackTrace();
 				}
 				continue;
 			}
 		}
 		htmlContent = htmlContent.replaceAll("&nbsp;", "");
-		Logger.write(
+		LogHelper.write(
 				"HttpHelper.getResponseAsString() - Completed getting content of URL: "
-						+ Url.substring(Url.lastIndexOf("/")), Logger.DEBUG);
+						+ Url.substring(Url.lastIndexOf("/")), LogHelper.DEBUG);
 		return htmlContent;
 	}
 }

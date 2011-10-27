@@ -2,26 +2,28 @@ package com.easycrawler;
 
 import org.htmlparser.util.NodeList;
 
-public class DetailPage extends WebPage {
+import com.easycrawler.helper.LogHelper;
 
-	private HttpHelper httpHelper;
+public class DetailWebPage extends WebPageBase {
 
-	public DetailPage() {
-		httpHelper = new HttpHelper();
+	private HttpHandler httpHelper;
+
+	public DetailWebPage() {
+		httpHelper = new HttpHandler();
 	}
 
 	public NodeList getNodeListWithAttribute(String Url, String attributeName,
 			String attributeValue) {
-		Logger.write(
+		LogHelper.write(
 				"MiibeianWebPage.getValidWebpageWithAttribute() - Start fetching page: "
-						+ Url, Logger.DEBUG);
+						+ Url, LogHelper.DEBUG);
 		String htmlContent = "";
 		do {
 			htmlContent = httpHelper.getResponseAsString(Url);
 		} while (!hasAttribute(htmlContent, attributeName, attributeValue));
-		Logger.write(
+		LogHelper.write(
 				"MiibeianWebPage.getValidWebpage() - Completed fetching page: "
-						+ Url, Logger.INFO);
+						+ Url, LogHelper.INFO);
 		NodeList list = transferToNodeList(htmlContent, attributeName,
 				attributeValue);
 		return list;
